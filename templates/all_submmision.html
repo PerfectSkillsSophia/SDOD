@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container h-100" style="margin-top: 5px;">
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show text-center" role="alert">
+
+        <strong>{{ message }}</strong>
+
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    {% endfor %}
+    {% endif %}
+    <div class="container" style="margin-top: 10px;">
+        <div class="row">
+            <div class="col-md">
+                <form class="form-inline my-2 my-lg-0" method="get" action="{% url 'searchbar' %}">
+                    <input class="form-control mr-sm-2" type="text" name="q" value="{{ query }}" placeholder="Search">
+                    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% if results %}
+    <div class="container" style="margin-top: 5px;">
+        <div class="row">
+            {% for result in results %}
+            <div class="col-md-4" style="margin-top:10px ;">
+
+                <div class="card" style="width: 18rem; margin: 5px 5px 5px 5px;">
+                    <video controls src="{{ url }}{{ result.videoAns }}" type="video/webm"></video>
+                    <div class="card-body">
+                        <h5 class="card-title">User Name : {{ result.user_name }}</h5>
+                        <a href="allAnswer/{{result.ansId }}" class="btn btn-primary btn-block">View Analysis</a>
+                        <a href="generate_tras/{{ result.ansId }}" class="btn btn-primary btn-block">Generate
+                            Trascript</a>
+                    </div>
+                </div>
+
+
+
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+
+    <div class="container " style="margin-top: 5px;">
+        <div class="row">
+            {% for video in video.all reversed %}
+            <div class="col-md-4" style="margin-top:10px ;">
+                <div class="card" style="width: 18rem; margin: 5px 5px 5px 5px;">
+                    <video controls src="{{ url }}{{ video.videoAns }}" type="video/webm"></video>
+                    <div class="card-body">
+                        <h5 class="card-title">User Name : {{ video.user_name }}</h5>
+                        <a href="{{video.ansId }}" class="btn btn-primary btn-block">View Analysis</a>
+                        <a href="generate_tras/{{ video.ansId }}" class="btn btn-primary btn-block">Generate
+                            Trascript</a>
+
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    {% endblock %}

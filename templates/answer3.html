@@ -1,0 +1,312 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+{% if user.is_authenticated %}
+<section class="vh-100" style="background-color: rgb(255, 255, 255); margin-top: 10px;">
+  <div class="container h-100">
+    <div class="row">
+      <h5> Assessment Name:<span id="assname"> {{ assname }}</span></h5>
+    </div>
+    <!-- Quostion and Assessment View -->
+    <div class="row" style="margin-left:5px;">
+
+      <div id="quiz" class="row">
+        {% for i in question %}
+        <div class="question" {% if forloop.first %}style="display: block" {% else %}style="display: none" {% endif %}>
+          <h5>Question {{ forloop.counter }}</h5>
+          <h5 id="que">{{ i.quostion }} <span style="display:none;">{{ i.questionId }}</span></h5>
+        </div>
+        {% endfor %}
+      </div>
+
+
+    </div>
+    <hr>
+    <div class="row d-flex justify-content-center align-items-center h-100">
+      <!-- Video View -->
+      <div class="col-md-6">
+        <h5 style="margin-left:5px; margin-right: 5px;">Instructions on how to use the platform.</h5>
+        <ol>
+          <li>Click <span class="text-success">Start</span> to start your video streaming</li>
+          <li>Click <span class="text-success">Record</span> to start video recording</li>
+          <li>Click <span class="text-success">Next</span> to go on next question</li>
+          <li>Click <span class="text-success">Stop</span> to stop video recording</li>
+          <li>Click <span class="text-success">Submit</span> to submit your video assessment</li>
+        </ol>
+        <div class="row d-flex justify-content-center align-items-center h-100">
+          <div class="col-md-4"><button class="btn btn-primary btn-lg btn-block"
+              style=" margin-top: 5px; margin-bottom: 5px;" id="start">Start</button></div>
+          <div class="col-md-4"><button class="btn btn-primary btn-lg btn-block"
+              style=" margin-top: 5px; margin-bottom: 5px;" id="record" disabled>Record</button></div>
+          <div class="col-md-4"><button class="btn btn-primary btn-lg btn-block"
+              style=" margin-top: 5px; margin-bottom: 5px;" id="upload" disabled>Submit</button></div>
+          <div style="visibility: hidden;">
+            <label for="vehicle1" style="visibility: hidden;">Echo cancellation:</label>
+            <input type="checkbox" style="visibility: hidden;" id="echoCancellation"><br>
+          </div>
+          <hr>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <code>Video will appear here</code>
+        <video class="embed-responsive embed-responsive-16by9" id="gum" playsinline autoplay muted></video>
+      </div>
+      <ul id="blob-list"></ul>
+
+    </div>
+    <hr>
+    <div class="row d-flex justify-content-center align-items-center h-100">
+
+      <div class="col-md-12">
+        <div class="row">
+          <div class="col">
+            <button class="btn btn-primary btn-lg btn-block" id="nextBtn" disabled>Next Question</button>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+    <hr>
+    <!-- Action View  -->
+
+    <div class="row d-flex justify-content-center align-items-center h-100">
+      <a class="btn btn-danger btn-lg" id="exit" href="{% url 'feedback' %}" role="button"
+        style="visibility: hidden; margin-top: 5px; margin-bottom: 5px; margin-left: 5px; margin-right: 5px; width: 100%;">Exit
+        Assessment</a>
+    </div>
+  </div>
+
+
+</section>
+
+
+
+{% endif %}
+
+<script type="text/javascript">
+
+  'use strict';
+
+  /* globals MediaRecorder */
+  let mediaRecorder;
+  let recordedBlobs;
+  var currentQuestion = 0;
+  var blobs = [];
+  var final = [];
+  var allque = [];
+  const questions = document.getElementsByClassName("question");
+  const nextBtn = document.getElementById("nextBtn");
+  const errorMsgElement = document.querySelector('span#errorMsg');
+  const recordedVideo = document.querySelector('video#gum');
+  const recordButton = document.querySelector('button#record');
+  const uploadButton = document.querySelector('button#upload');
+  const startButton = document.querySelector('button#start');
+  const nextButton = document.querySelector('button#next');
+
+  // Hide all questions except the first one
+  for (var i = 1; i < questions.length; i++) {
+    questions[i].style.display = "none";
+  }
+  // Add event listener to the navigation button
+  nextBtn.addEventListener("click", function () {
+    currentQuestion++;
+    showQuestion(currentQuestion);
+    mediaRecorder.stop();
+    startRecording();
+  });
+
+  //Loop through all the question elements and append them to allque
+  var questionElems = document.querySelectorAll(".question");
+  for (var i = 0; i < questionElems.length; i++) {
+    allque.push(questionElems[i].textContent);
+  }
+
+
+  function showQuestion(n) {
+    // Disable the next button on the last question
+if (n == questions.length-1){
+  nextBtn.innerHTML = "Stop Assessments";
+}
+    else if (n == questions.length) {
+      mediaRecorder.stop();
+      nextBtn.innerHTML = "Click Stop Button to stopt your Recording.";
+      nextBtn.disabled = true;
+      recordButton.disabled = false;
+    } else {
+      nextBtn.disabled = false;
+    }
+
+    // Hide all questions except the one at index n
+    for (var i = 0; i < questions.length; i++) {
+      if (i == n) {
+        questions[i].style.display = "block";
+      } else {
+        questions[i].style.display = "none";
+      }
+    }
+  }
+
+  async function init(constraints) {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      handleSuccess(stream);
+    } catch (e) {
+      console.error('navigator.getUserMedia error:', e);
+      errorMsgElement.innerHTML = `navigator.getUserMedia error:${e.toString()}`;
+    }
+  }
+
+  function handleSuccess(stream) {
+    recordButton.disabled = false;
+    console.log('getUserMedia() got stream:', stream);
+    window.stream = stream;
+
+    const gumVideo = document.querySelector('video#gum');
+    gumVideo.srcObject = stream;
+  }
+
+  startButton.addEventListener('click', async () => {
+    const hasEchoCancellation = document.querySelector('#echoCancellation').checked;
+    const constraints = {
+      audio: {
+        echoCancellation: { exact: hasEchoCancellation }
+      },
+      video: {
+        width: 2040, height: 1080
+      }
+    };
+    console.log('Using media constraints:', constraints);
+    await init(constraints);
+  });
+
+  //record button
+  recordButton.addEventListener('click', () => {
+
+    if (recordButton.textContent === 'Record') {
+      alert("Recording is started")
+      startRecording();
+      recordButton.disabled = true
+      nextBtn.disabled = false;
+    } else {
+      alert("Your answer is recorded review your answer and then submit it!")
+      //stopRecording()
+      recordButton.textContent = 'Record'
+
+      uploadButton.disabled = false
+      startButton.disabled = true
+      recordButton.disabled = true
+    }
+  });
+
+  //startRecording
+  function startRecording() {
+    recordedBlobs = []
+    let options = {
+      MimeType: 'video/webm;codecs=vp9,opus'
+    }
+    try {
+      mediaRecorder = new MediaRecorder(window.stream, options)
+
+
+
+    } catch (e) {
+      console.error('Exception while creating MediaRecorder:', e);
+      return;
+    }
+    recordButton.textContent = 'Stop';
+    uploadButton.disabled = true;
+    mediaRecorder.onstop = (event) => {
+    };
+    mediaRecorder.ondataavailable = handleDataAvailable;
+    mediaRecorder.start();
+    console.log('MediaRecorder started', mediaRecorder);
+  }
+  //handleDataAvailable
+  function handleDataAvailable(event) {
+    if (event.data && event.data.size > 0) {
+      recordedBlobs.push(event.data);
+      createBlob(recordedBlobs);
+    }
+  }
+  // Function to create a blob from recorded blob data
+  function createBlob(recordedBlobs) {
+    // Create a new Blob object from the recorded blob data
+    var videoBlob = new Blob(recordedBlobs, { type: 'video/webm' });
+
+    // Add the blob to the blobs array
+    blobs.push(videoBlob);
+    console.log(blobs)
+
+    // Clear the recorded blob data
+    recordedBlobs = [];
+  }
+
+
+
+
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        // Does this cookie string begin with the name we want?
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+  let ass_name = document.getElementById("assname").innerHTML;
+  //upload func
+  uploadButton.addEventListener('click', () => {
+    var container = new FormData();
+    for (var i = 0; i < blobs.length; i++) {
+      container.append('video_' + i, blobs[i], 'video_' + i + '.webm');
+    }
+
+    container.append('questions', JSON.stringify(allque));
+    container.append('ass_name', ass_name)
+
+
+
+    $.ajax({
+      type: 'POST',
+      url: 'fileUpload/',
+      headers: { "X-CSRFToken": getCookie("csrftoken") },
+      mode: "same-origin",
+      beforeSend: function () {
+        uploadButton.disabled = true
+        startButton.disabled = true
+        recordButton.disabled = true
+      },
+      success: function () {
+        alert("Your assessment is submited successfully! Exit The Assessment.")
+        document.getElementById("exit").style.visibility = "visible";
+
+      },
+      error: function () { // if error occured
+        alert("Error occured.please try again");
+        uploadButton.disabled = false
+
+      },
+      data: container,
+      processData: false,
+      contentType: false
+    })
+
+
+  });
+
+  //stopRecording
+  function stopRecording() {
+    mediaRecorder.stop();
+    document.getElementById("exit").style.visibility = "visible";
+  }
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var backButton = document.querySelector('#back-button');
+            backButton.addEventListener('click', function(event) {
+                event.preventDefault();
+                window.history.back();
+            });
+        });
+    </script>
+    <br>
+        <div class="row">
+          <div class="col-md-5">
+            <h1>AAdd Questions.</h1>
+          </div>
+          <div class="col-md-4">
+          </div>
+          <div class="col-md-3">
+            <a class="btn btn-primary btn-lg" href="#" id="back-button">Back</a>
+            <hr>
+          </div>
+        </div>
+    <form action="{% url 'Addquestion'  %}">
+        <div class="form-group">
+            <input class="form-control" name="que" type="que" placeholder="Write Question! "><br>
+            <input class="form-control" name="correctanswer" type="correctanswer" placeholder="Provide correct answer ">
+        </div>
+        <div class="form-group">
+            <select class="form-control" name="ass" id="ass">
+                {% for ass in ass.all %}
+                <option value="{{ ass.assessmentName }}">{{ ass.assessmentName }}</option>
+                {% endfor %}
+            </select>
+
+        </div>
+        <div class="form-group"><button class="btn btn-primary btn-block my-2 my-sm-0" type="submit">ADD</button></div>
+    </form>
+    <hr>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-5">
+            <h1>Questions.</h1>
+        </div>
+        <div class="col-md-5">
+            {% for que in ques.all reversed %}
+            <h5>Question: {{ que.quostion }}<h5>
+                <h6>Answer: {{ que.correctanswer }}</h6>
+
+                    </ol>
+                    {% endfor %}
+        </div>
+        <div class="col-md-2">
+        </div>
+    </div>
+    <hr>
+</div>
+
+{% endblock %}

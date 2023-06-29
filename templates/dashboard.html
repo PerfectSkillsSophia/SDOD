@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<br>
+<div class="container">
+    <div class="row">
+        <div class="col-md-5">
+            <h1>Assessment</h1>
+        </div>
+        <div class="col-md-4">
+        </div>
+        <div class="col-md-3">
+            <a class="btn btn-primary btn-lg" href="{% url 'allAnswer' %}" role="button">All Submissions. </a><hr>
+        </div>
+    </div>
+    <hr>
+</div>
+<div class="container">
+    <div class="row">
+        {% for assessment in assessment.all %}
+        <div class="col-md-4" style="margin-top:10px ;">
+            <div class="card">
+                <div class="card-header" style="background-color: rgba(0, 217, 255, 0.055);">
+                    {{ assessment.assessmentName }}
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-primary" role="alert">
+                        https://perfectskills.co/assessments/welcome/{{ assessment.assessmentName }}<br>
+                        <hr>
+                        <a href="assessment/{{assessment.assId}}" class="btn btn-primary  btn-block"
+                            id="view{{assessment.assId}}">Add Questions.</a>
+                        <hr>
+                    </div>
+                    <!--  <a href="#" class="btn btn-primary">Send Link</a> -->
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}S

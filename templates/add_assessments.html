@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<script>
+  function validateInput(event) {
+    const inputValue = event.target.value;
+    const firstCharacter = inputValue.charAt(0);
+
+    // Remove spaces
+    event.target.value = inputValue.replace(/\s/g, '');
+
+    // Check for special characters or numbers at the beginning
+    const regex = /^[^A-Za-z]/;
+    if (regex.test(firstCharacter)) {
+      event.target.value = '';
+    }
+  }
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+      var backButton = document.querySelector('#back-button');
+      backButton.addEventListener('click', function(event) {
+          event.preventDefault();
+          window.history.back();
+      });
+  });
+</script>
+
+<br>
+<div class="container">
+  <div class="row">
+    <div class="col-md-5">
+      <h1>Add Assessment</h1>
+    </div>
+    <div class="col-md-4">
+    </div>
+    <div class="col-md-3">
+      <a class="btn btn-primary btn-lg" href="#" id="back-button">Back</a>
+      <hr>
+    </div>
+  </div>
+  <div class="alert alert-secondary" role="alert">
+    Note : <span style="color: blue;">
+      <ol>
+
+        <li>Do not start Assessment name with Numbers and special characters. </li>
+        <li>Space in the Assessment name is not allowed. </li>
+        <li>Use "_" if wnat please don't use any other characters to avoid conflict. </li>
+
+      </ol>
+    </span>
+  </div>
+  <form action="{% url 'Add' %}">
+    <div class="form-group">
+      <input class="form-control" name="ass_name" type="text" oninput="validateInput(event)"
+        placeholder="Assessment Name">
+    </div>
+    <div class="form-group">
+      <textarea class="form-control" name="ass_dec" type="ass_dec" placeholder="Assessment Description"></textarea>
+    </div>
+    <button class="btn btn-primary btn-block my-2 my-sm-0" type="submit">ADD</button>
+  </form>
+  <hr>
+</div>
+{% endblock %}

@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+<section class="vh-100" style="background-color: rgb(255, 255, 255);margin-top: 50px;">
+    <div class="container h-100" style="margin-top: 5px;">
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show text-center" role="alert">
+
+            <strong>{{ message }}</strong>
+
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                var backButton = document.querySelector('#back-button');
+                backButton.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    window.history.back();
+                });
+            });
+        </script>
+        <br>
+        <div class="container">
+            <div class="row">
+              <div class="col-md-5">
+                <h3>Context base analysis.</h3>
+                <h4>Add statements to see accuracy based on context of statements.</h4>
+              </div>
+              <div class="col-md-4">
+              </div>
+              <div class="col-md-3">
+                <a class="btn btn-primary btn-lg" href="#" id="back-button">Back</a>
+                <hr>
+              </div>
+            </div>
+            <hr>
+        </div>
+
+        <form action="{% url 'testresultfunc'  %}">
+            <div class="form-group">
+                <h6 style="margin-top: 5px;text-align: center;">This statement is consider as predefine answer from teacher.</h6>
+                <input class="form-control" name="s1" type="s1" placeholder="enter statement 1"><br>
+                <h6 style="margin-top: 5px;text-align: center;">This statement is consider as answer from student.</h6>
+                <input class="form-control" name="s2" type="s2" placeholder="enter statement 2">
+            </div>
+            <div class="form-group"><button class="btn btn-primary btn-block my-2 my-sm-0" type="submit">result</button>
+            </div>
+        </form>
+        {% if s1 and s2 %}
+        <div class="row">
+            <div class="col-md-6">
+                <h4>Statement 1 : <br>{{ s1 }}</h4>
+            </div>
+            <div class="col-md-6">
+                <h4> Statement 2 :<br>{{ s2 }}</h4>
+            </div>
+        </div>
+
+        <hr>
+        <div class="row">
+            <div class="col-md-4">
+                <h6 style="margin-top: 5px;text-align: center;">Test Version 1 Result</h6>
+                <div class="card-header" style="margin-top: 5px;text-align: center;">
+                    Accuracy of Answer is: {{ accuracy1 }} %
+                </div>
+            </div>
+            <div class="col-md-4">
+                <h6 style="margin-top: 5px;text-align: center;">Test Version 2 Result</h6>
+                <div class="card-header" style="margin-top: 5px;text-align: center;">
+                    Accuracy of Answer is: {{ accuracy2 }} %
+                </div>
+            </div>
+            <div class="col-md-4">
+                <h6 style="margin-top: 5px;text-align: center;">Test Version 3 Result</h6>
+                <div class="card-header" style="margin-top: 5px;text-align: center;">
+                    Accuracy of Answer is: {{ accuracy3 }} %
+                </div>
+            </div>
+        </div>
+        <hr>
+        {% endif %}
+    </div>
+
+</section>
+
+
+
+
+
+
+
+{% endblock %}
