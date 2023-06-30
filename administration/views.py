@@ -11,6 +11,7 @@ from sophia import settings
 from .result import *
 from thefuzz import fuzz
 from statistics import mean
+from .faceanalysis import analyze_emotions
 
 
 @staff_member_required
@@ -40,7 +41,6 @@ def detail_view(request, user_name, assessment_name, identi):
     data = videoAns.objects.filter(
         user_name=user_name, assessment_name=assessment_name, identi=identi)
     return render(request, 'detail.html', {'data': data,'sub_status': sub_status,'url': url, 'user_name': user_name,})
-
 
 @staff_member_required
 @login_required(login_url='login')
@@ -102,80 +102,6 @@ def Add_question(request):
         return HttpResponseRedirect(reverse("view", args=(ass_id,)))
     return HttpResponseRedirect(reverse("view", args=(ass_id,)))
 
-
-@staff_member_required
-@login_required(login_url='login')
-def generate_tras(request, ansId):
-    ref_url = request.META.get('HTTP_REFERER')
-    result = videoAns.objects.get(ansId=ansId)
-    vf = result.videoAns.path
-    import requests
-    API_KEY = "623cfea0aba24d8f981195bbc20d48e0"
-    filename = vf
-
-# Upload Module Begins
-    def read_file(filename, chunk_size=5242880):
-        with open(filename, 'rb') as _file:
-            while True:
-                data = _file.read(chunk_size)
-                if not data:
-                    break
-                yield data
-
-    headers = {'authorization': API_KEY}
-    response = requests.post('https://api.assemblyai.com/v2/upload',
-                             headers=headers,
-                             data=read_file(filename))
-
-    json_str1 = response.json()
-# Upload Module Ends
-
-# Submit Module Begins
-    endpoint = "https://api.assemblyai.com/v2/transcript"
-    json = {
-        "audio_url": json_str1["upload_url"]
-    }
-
-    response = requests.post(endpoint, json=json, headers=headers)
-
-    json_str2 = response.json()
-# Submit Module Ends
-
-# CheckStatus Module Begins
-    endpoint = "https://api.assemblyai.com/v2/transcript/" + json_str2["id"]
-
-    response = requests.get(endpoint, headers=headers)
-
-    json_str3 = response.json()
-
-    while json_str3["status"] != "completed":
-        response = requests.get(endpoint, headers=headers)
-        json_str3 = response.json()
-# CheckStatus Module Ends
-    result.trasnscript = json_str3["text"]
-    result.save()
-    messages.success(request, 'Transcript is generated Successfully.')
-    return HttpResponseRedirect(ref_url)
-
-
-@staff_member_required
-@login_required(login_url='login')
-def generate_result(request, ansId):
-    if ansId:
-        ref_url = request.META.get('HTTP_REFERER')
-        answer = videoAns.objects.filter(ansId=ansId)
-        for trans in answer:
-            s1 = trans.question_id.correctanswer
-            s2 = trans.trasnscript
-        accuracy = FindAcc(s1, s2)
-        answer = videoAns.objects.get(ansId=ansId)
-        answer.answer_accurecy = accuracy
-        answer.save()
-        print(s1)
-        print(s2)
-    return HttpResponseRedirect(ref_url)
-
-
 def testresultfunc(request):
     if request.method == 'GET':
         s1 = request.GET.get('s1')
@@ -208,6 +134,24 @@ def run_task(request):
         assessment_name = request.POST.get('assessment_name')
         identi = request.POST.get('identi')
         video_ans_ids = request.POST.get('video_ans_ids').split(',')
+        data = videoAns.objects.filter(
+        user_name=user_name, assessment_name=assessment_name, identi=identi)
+        data1 = videoAns.objects.filter(
+        user_name=user_name, assessment_name=assessment_name, identi=identi)
+        for video_ans_id in data1:
+
+            vf=video_ans_id.videoAns.path
+            confidence, nervousness = analyze_emotions(vf)
+            if confidence is not None and nervousness is not None:
+                print("Confidence:", confidence, "%")
+                print("Nervousness:", nervousness, "%")
+                video_ans_id.confidence=confidence
+                video_ans_id.nervousness=nervousness
+                video_ans_id.save()
+
+            else:
+                print("Error occurred during analysis.")
+
         for video_ans_id in video_ans_ids:
             print(video_ans_id)
             result = videoAns.objects.get(ansId=video_ans_id)

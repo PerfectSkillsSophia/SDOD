@@ -3,28 +3,39 @@
 
 {% block content %}
 
-  <style>
+<style>
     .loader {
-      border: 16px solid #f3f3f3;
-      border-radius: 50%;
-      border-top: 16px solid #3498db;
-      width: 120px;
-      height: 120px;
-      -webkit-animation: spin 2s linear infinite; /* Safari */
-      animation: spin 2s linear infinite;
+        border: 16px solid #f3f3f3;
+        border-radius: 50%;
+        border-top: 16px solid #3498db;
+        width: 120px;
+        height: 120px;
+        -webkit-animation: spin 2s linear infinite;
+        /* Safari */
+        animation: spin 2s linear infinite;
     }
-    
+
     /* Safari */
     @-webkit-keyframes spin {
-      0% { -webkit-transform: rotate(0deg); }
-      100% { -webkit-transform: rotate(360deg); }
+        0% {
+            -webkit-transform: rotate(0deg);
+        }
+
+        100% {
+            -webkit-transform: rotate(360deg);
+        }
     }
-    
+
     @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
     }
-    </style>
+</style>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         var backButton = document.querySelector('#back-button');
@@ -54,7 +65,7 @@
                 <div class="row">
                     <h5>User Name: {{ user_name }}</h5>
                 </div>
-                
+
                 <div class="row">
                     {% for i in sub_status %}
                     {% if i.final_result %}
@@ -110,6 +121,20 @@
                         <div class="card-header" style="margin-top: 5px;text-align: center;">
                             Accuracy of Answer is: {{ item.answer_accurecy }} %
 
+
+                        </div>
+
+                        <div class="card-header" style="margin-top: 5px;text-align: center;">
+
+                            confidence: {{ item.confidence }}
+
+
+                        </div>
+
+                        <div class="card-header" style="margin-top: 5px;text-align: center;">
+
+                            nervousness : {{ item.nervousness }}
+
                         </div>
                         <br>
                     </row>
@@ -143,7 +168,8 @@
                         <div class="card-body p-md-5">
                             <div class="row justify-content-center">
                                 <div class="col-md-10 col-lg-6 col-xl-5 order-2 order-lg-1">
-                                    <p class="text-center h1 fw-bold mb-5 mx-1 mx-md-4 mt-4" id="generate">Result is not yet generated.</p>
+                                    <p class="text-center h1 fw-bold mb-5 mx-1 mx-md-4 mt-4" id="generate">Result is not
+                                        yet generated.</p>
 
                                 </div>
                                 <div class="col-md-10 col-lg-6 col-xl-7 d-flex align-items-center order-1 order-lg-2">
@@ -158,31 +184,32 @@
 
                                         <input type="hidden" name="video_ans_ids"
                                             value="{% for item in data %}{{ item.ansId }}{% if not forloop.last %},{% endif %}{% endfor %}">
-                                        <button class="btn btn-primary btn-lg btn-block" id="run-task-button" type="submit">Generate result now !</button>
+                                        <button class="btn btn-primary btn-lg btn-block" id="run-task-button"
+                                            type="submit">Generate result now !</button>
                                     </form>
                                     <script>
-                                        document.getElementById("run-task-button").addEventListener("click", function(event) {
-                                          event.preventDefault(); // Prevent form submission (to control the loader display)
-                                      
-                                          var loader = document.querySelector(".loader");
-                                          var generateText = document.getElementById("generate");
-                                          var formResult = document.getElementById("formresult");
-                                      
-                                          loader.style.display = "block"; // Show the loader
-                                          generateText.textContent = "Result is generating.....!"; // Update the text content
-                                          formResult.style.display = "none"; // Hide the formresult element
-                                      
-                                          // Submit the form after a short delay to allow the loader to be displayed
-                                          setTimeout(function() {
-                                            formResult.submit();
-                                          }, 100);
+                                        document.getElementById("run-task-button").addEventListener("click", function (event) {
+                                            event.preventDefault(); // Prevent form submission (to control the loader display)
+
+                                            var loader = document.querySelector(".loader");
+                                            var generateText = document.getElementById("generate");
+                                            var formResult = document.getElementById("formresult");
+
+                                            loader.style.display = "block"; // Show the loader
+                                            generateText.textContent = "Result is generating.....!"; // Update the text content
+                                            formResult.style.display = "none"; // Hide the formresult element
+
+                                            // Submit the form after a short delay to allow the loader to be displayed
+                                            setTimeout(function () {
+                                                formResult.submit();
+                                            }, 100);
                                         });
-                                      </script>
+                                    </script>
                                 </div>
                             </div>
                             <div class="spinner-border text-primary" role="status">
                                 <span class="sr-only">Loading...</span>
-                              </div>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 
 
-# Create your views here.
+# Create your views here
 
 def home (request):
 	if request.user.is_authenticated:
