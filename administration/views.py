@@ -11,7 +11,7 @@ from sophia import settings
 from .result import *
 from thefuzz import fuzz
 from statistics import mean
-from .faceanalysis import analyze_emotions
+from .faceanalysis import analyze_emotions,analyze_video_emotions
 
 
 @staff_member_required
@@ -141,16 +141,18 @@ def run_task(request):
         for video_ans_id in data1:
 
             vf=video_ans_id.videoAns.path
-            confidence, nervousness = analyze_emotions(vf)
-            if confidence is not None and nervousness is not None:
-                print("Confidence:", confidence, "%")
-                print("Nervousness:", nervousness, "%")
-                video_ans_id.confidence=confidence
-                video_ans_id.nervousness=nervousness
-                video_ans_id.save()
+            confidence, nervousness = analyze_video_emotions(vf)
+            print("confidence:", confidence, "%\nnervousness:", nervousness, "%")
+            # confidence, nervousness = analyze_emotions(vf)
+            # if confidence is not None and nervousness is not None:
+            #     print("Confidence:", confidence, "%")
+            #     print("Nervousness:", nervousness, "%")
+            video_ans_id.confidence=confidence
+            video_ans_id.nervousness=nervousness
+            video_ans_id.save()
 
-            else:
-                print("Error occurred during analysis.")
+            # else:
+            #     print("Error occurred during analysis.")
 
         for video_ans_id in video_ans_ids:
             print(video_ans_id)
@@ -205,6 +207,7 @@ def run_task(request):
         sub_status = submission_status.objects.get(
         user_name=user_name, assessment_name=assessment_name, identi=identi)
         sub_status.final_result=mean_acc
+        sub_status.result_generate=True
         sub_status.save()
         messages.success(request, 'Result is generated Successfully.')
     return HttpResponseRedirect(ref_url,{'mean_acc':mean_acc})

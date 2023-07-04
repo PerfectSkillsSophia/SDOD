@@ -31,5 +31,6 @@ class submission_status(models.Model):
         identi = models.CharField(max_length=300,null=True,default="None")
         final_result = models.IntegerField(null=True,default=0)
         submissionstatus = models.BooleanField(default=False)
+        result_generate = models.BooleanField(default=False)
         def __str__(self):
             return f" User name :{self.user_name} - Assessment_Name :  {self.assessment_name} - submission status : {self.submissionstatus}- final_result : {self.final_result}"
