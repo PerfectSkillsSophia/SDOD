@@ -201,10 +201,9 @@ def run_task(request):
         user_name=user_name, assessment_name=assessment_name, identi=identi)
         for video_ans_id in data1:
             media_folder_path = settings.MEDIA_ROOT
-            vf=video_ans_id
-            video_path = os.path.join(media_folder_path, str(vf))
-
-            confidence, nervousness = analyze_video_emotions(video_path)
+            vf=video_ans_id.videoans.path
+            #video_path = os.path.join(media_folder_path, str(vf))
+            confidence, nervousness = analyze_video_emotions(vf)
             print("confidence:", confidence, "%\nnervousness:", nervousness, "%")
             # confidence, nervousness = analyze_emotions(vf)
             # if confidence is not None and nervousness is not None:
