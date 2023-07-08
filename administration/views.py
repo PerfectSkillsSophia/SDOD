@@ -14,9 +14,9 @@ from statistics import mean
 
 from fer import FER
 import cv2
-
-import cv2
-from fer import FER
+from django.conf import settings
+import os
+from django.core.files.storage import default_storage
 
 def analyze_video_emotions(video_path):
     vid = cv2.VideoCapture(video_path)
@@ -31,22 +31,21 @@ def analyze_video_emotions(video_path):
     sad1 = fear1 = happy1 = angry1 = surprise1 = disgust1 = neutral1 = 0
 
     while True:
-        ret, raw_frame = vid.read()
+        ret, frame = vid.read()
         if not ret:
             break
 
         if n % fps == 0:
-            frame = cv2.cvtColor(raw_frame, cv2.COLOR_BGR2RGB)
             attri = emotion_detector.detect_emotions(frame)
             print(attri)
             if len(attri) > 0:
-                sad1 += attri[0]["emotions"]['sad']
-                fear1 += attri[0]["emotions"]['fear']
-                happy1 += attri[0]["emotions"]['happy']
-                angry1 += attri[0]["emotions"]['angry']
-                surprise1 += attri[0]["emotions"]['surprise']
-                disgust1 += attri[0]["emotions"]['disgust']
-                neutral1 += attri[0]["emotions"]['neutral']
+                sad1 += attri[0]["emotions"].get('sad', 0)
+                fear1 += attri[0]["emotions"].get('fear', 0)
+                happy1 += attri[0]["emotions"].get('happy', 0)
+                angry1 += attri[0]["emotions"].get('angry', 0)
+                surprise1 += attri[0]["emotions"].get('surprise', 0)
+                disgust1 += attri[0]["emotions"].get('disgust', 0)
+                neutral1 += attri[0]["emotions"].get('neutral', 0)
                 i += 1
             else:
                 break
@@ -59,9 +58,9 @@ def analyze_video_emotions(video_path):
         cv2.waitKey(1)
 
     total = sad1 + fear1 + happy1 + angry1 + surprise1 + disgust1 + neutral1
-    confidence = ((happy1 + angry1 + surprise1 + disgust1) / total) * 100
-    nervousness = ((sad1 + fear1) / total) * 100
-    neutral1 = (neutral1 / total) * 100
+    confidence = ((happy1 + angry1 + surprise1 + disgust1) / total) * 100 if total > 0 else 0
+    nervousness = ((sad1 + fear1) / total) * 100 if total > 0 else 0
+    neutral1 = (neutral1 / total) * 100 if total > 0 else 0
 
     if confidence > nervousness:
         confidence += neutral1
@@ -70,6 +69,8 @@ def analyze_video_emotions(video_path):
 
     return confidence, nervousness
 
+
+# Example usage:
 # Example usage:
 
 
@@ -199,8 +200,10 @@ def run_task(request):
         data1 = videoAns.objects.filter(
         user_name=user_name, assessment_name=assessment_name, identi=identi)
         for video_ans_id in data1:
-            vf=video_ans_id.videoAns.path
-            video_path = 'path/to/your/video.webm'
+            media_folder_path = settings.MEDIA_ROOT
+            vf=video_ans_id
+            video_path = os.path.join(media_folder_path, vf)
+
             confidence, nervousness = analyze_video_emotions(video_path)
             print("confidence:", confidence, "%\nnervousness:", nervousness, "%")
             # confidence, nervousness = analyze_emotions(vf)
