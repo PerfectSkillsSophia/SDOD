@@ -188,16 +188,16 @@ def run_task(request):
         user_name=user_name, assessment_name=assessment_name, identi=identi)
         for video_ans_id in data1:
 
-            vf=video_ans_id.videoAns.path
-            confidence, nervousness = analyze_video_emotions(vf)
-            print("confidence:", confidence, "%\nnervousness:", nervousness, "%")
+            #vf=video_ans_id.videoAns.path
+            #confidence, nervousness = analyze_video_emotions(vf)
+            #print("confidence:", confidence, "%\nnervousness:", nervousness, "%")
             # confidence, nervousness = analyze_emotions(vf)
             # if confidence is not None and nervousness is not None:
             #     print("Confidence:", confidence, "%")
             #     print("Nervousness:", nervousness, "%")
-            video_ans_id.confidence=confidence
-            video_ans_id.nervousness=nervousness
-            video_ans_id.save()
+            #video_ans_id.confidence=confidence
+            #video_ans_id.nervousness=nervousness
+            #video_ans_id.save()
 
             # else:
             #     print("Error occurred during analysis.")
