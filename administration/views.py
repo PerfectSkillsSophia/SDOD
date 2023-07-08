@@ -15,8 +15,14 @@ from statistics import mean
 from fer import FER
 import cv2
 
+import cv2
+from fer import FER
+
 def analyze_video_emotions(video_path):
     vid = cv2.VideoCapture(video_path)
+    if not vid.isOpened():
+        raise ValueError("Could not open the video file")
+
     fps = vid.get(cv2.CAP_PROP_FPS)
     fps = int(fps)
     emotion_detector = FER()
@@ -25,8 +31,12 @@ def analyze_video_emotions(video_path):
     sad1 = fear1 = happy1 = angry1 = surprise1 = disgust1 = neutral1 = 0
 
     while True:
-        ret, frame = vid.read()
+        ret, raw_frame = vid.read()
+        if not ret:
+            break
+
         if n % fps == 0:
+            frame = cv2.cvtColor(raw_frame, cv2.COLOR_BGR2RGB)
             attri = emotion_detector.detect_emotions(frame)
             print(attri)
             if len(attri) > 0:
@@ -41,8 +51,6 @@ def analyze_video_emotions(video_path):
             else:
                 break
         n += 1
-        if ret == False:
-            break
 
     vid.release()
     cv2.waitKey(1)
@@ -61,6 +69,10 @@ def analyze_video_emotions(video_path):
         nervousness += neutral1
 
     return confidence, nervousness
+
+# Example usage:
+
+
 
 @staff_member_required
 @login_required(login_url='login')
@@ -187,17 +199,17 @@ def run_task(request):
         data1 = videoAns.objects.filter(
         user_name=user_name, assessment_name=assessment_name, identi=identi)
         for video_ans_id in data1:
-
-            #vf=video_ans_id.videoAns.path
-            #confidence, nervousness = analyze_video_emotions(vf)
-            #print("confidence:", confidence, "%\nnervousness:", nervousness, "%")
+            vf=video_ans_id.videoAns.path
+            video_path = 'path/to/your/video.webm'
+            confidence, nervousness = analyze_video_emotions(video_path)
+            print("confidence:", confidence, "%\nnervousness:", nervousness, "%")
             # confidence, nervousness = analyze_emotions(vf)
             # if confidence is not None and nervousness is not None:
             #     print("Confidence:", confidence, "%")
             #     print("Nervousness:", nervousness, "%")
-            #video_ans_id.confidence=confidence
-            #video_ans_id.nervousness=nervousness
-            #video_ans_id.save()
+            video_ans_id.confidence=confidence
+            video_ans_id.nervousness=nervousness
+            video_ans_id.save()
 
             # else:
             #     print("Error occurred during analysis.")
