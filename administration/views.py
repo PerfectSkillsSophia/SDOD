@@ -202,7 +202,7 @@ def run_task(request):
         for video_ans_id in data1:
             media_folder_path = settings.MEDIA_ROOT
             vf=video_ans_id
-            video_path = os.path.join(media_folder_path, vf)
+            video_path = os.path.join(media_folder_path, str(vf))
 
             confidence, nervousness = analyze_video_emotions(video_path)
             print("confidence:", confidence, "%\nnervousness:", nervousness, "%")
