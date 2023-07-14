@@ -9,7 +9,6 @@ urlpatterns = [
     path('testresult/',testresult,name='testresult'),
     path('testresult/testresultfunc/',testresultfunc,name='testresultfunc'),
     path('run_task/', run_task, name='run_task'),
-    path('searchbar/',searchbar,name='searchbar'),
     path('addassessment/Add',Add_assessment,name='Add'),
     path('dashboard/assessment/<int:ass_id>/',view_assessments,name='view'),
     path('detail/<str:user_name>/<str:assessment_name>/<str:identi>/',detail_view, name='detail_view'),

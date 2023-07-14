@@ -15,7 +15,7 @@
     <br>
         <div class="row">
           <div class="col-md-5">
-            <h1>AAdd Questions.</h1>
+            <h1>Add Questions.</h1>
           </div>
           <div class="col-md-4">
           </div>
@@ -30,9 +30,9 @@
             <input class="form-control" name="correctanswer" type="correctanswer" placeholder="Provide correct answer ">
         </div>
         <div class="form-group">
-            <select class="form-control" name="ass" id="ass">
+            <select  type="hidden" class="form-control" name="ass" id="ass">
                 {% for ass in ass.all %}
-                <option value="{{ ass.assessmentName }}">{{ ass.assessmentName }}</option>
+                <option value="{{ ass.identi_assessment }}">{{ ass.identi_assessment }}</option>
                 {% endfor %}
             </select>
 

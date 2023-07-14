@@ -5,6 +5,7 @@ from django.conf import settings
 
 urlpatterns = [
     path('afterlogin/',afterlogin,name='afterlogin'),
+    path('ass_code/',ass_code,name='ass_code'),
     path('welcome/<slug:ass_name>/',welcomeScreen,name='welcome'),
     path('answer/',answer,name='answer'),
     path('answer/fileUpload/',fileUpload, name='fileUpload'),

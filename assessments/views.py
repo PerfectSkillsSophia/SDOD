@@ -15,6 +15,11 @@ import string
 # Define a view function to render a template after user login
 @login_required(login_url='login')
 def afterlogin(request):
+	return render(request,'welcomscreen.html')
+
+# Define a view function to render a template after user see welcome screen
+@login_required(login_url='login')
+def ass_code(request):
 	return render(request,'assessment_link.html')
 
 # Define a view function to render a welcome screen after user selects an assessment
@@ -27,10 +32,12 @@ def welcomeScreen(request, ass_name):
 # Define a view function to render assessment questions
 @login_required(login_url='login')
 def answer(request):
-    ass_name = slug
-    assname = ass_name
+    if request.method == 'POST':
+        identi_assessment = request.POST.get('identi_assessment')
+        assess=allAssessment.objects.get(identi_assessment=identi_assessment)
+        assname = assess.assessmentName
     # Get all questions related to the selected assessment
-    allque = allAssessment.objects.get(assessmentName=ass_name).question_set.all()
+        allque = allAssessment.objects.get(identi_assessment=identi_assessment).question_set.all()
     return render(request, 'answer3.html', {'question': allque, 'assname': assname})
 
 # Define a view function to handle video file uploads via AJAX call

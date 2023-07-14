@@ -33,7 +33,8 @@
             <div class="card" style="width: 18rem; margin: 5px 5px 5px 5px;">
                 <div class="card-body">
                     <h5 class="card-title">User Name : {{ item.user_name }}</h5>
-                    <h5 class="card-title">Assessments Name : {{ item.assessment_name }}</h5>
+                    <h5 class="card-title">Assessment Name : {{ item.assessment_name }}</h5>
+                    
                     <a href="{% url 'detail_view' item.user_name item.assessment_name item.identi %}" class="btn btn-primary
                         btn-block">View Analysis</a>
                 </div>
