@@ -358,10 +358,12 @@ def run_task(request):
         data1 = videoAns.objects.filter(user_name=user_name, assessment_name=assessment_name, identi=identi)
         for video_ans_id in data1:
             vf = video_ans_id.videoAns.path
-            confidence, nervousness = analyze_video_emotions(vf)
+            #confidence, nervousness = analyze_video_emotions(vf)
+            confidence, nervousness, neutral = analyze_video_emotions(vf)
             print("confidence:", confidence, "%\nnervousness:", nervousness, "%")
             video_ans_id.confidence = confidence
             video_ans_id.nervousness = nervousness
+            video_ans_id.neutral = neutral
             video_ans_id.save()
 
         for video_ans_id in video_ans_ids:

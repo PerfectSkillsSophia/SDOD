@@ -15,6 +15,7 @@ class videoAns(models.Model):
     answer_accurecy = models.IntegerField(null=True,default=0)
     confidence=models.IntegerField(null=True,default=0)
     nervousness=models.IntegerField(null=True,default=0)
+    neutral=models.IntegerField(null=True,default=0)
     def __str__(self):
         return f"{self.user_name} - {self.question_id} - {self.videoAns} - {self.assessment_name}"
 
