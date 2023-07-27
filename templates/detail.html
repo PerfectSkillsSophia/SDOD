@@ -82,8 +82,6 @@
 
             </div>
             <div class="col-md-4">
-                <!-- Button for taking a full-page screenshot -->
-<button class="btn btn-primary btn-lg" id="screenshot-button">Take Full Page Screenshot and Save as PDF</button>
             </div>
             <div class="col-md-4">
 
@@ -217,73 +215,5 @@
 
 </section>
 
-
-<!-- JavaScript code for screenshot functionality -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script>
-    $(document).ready(function () {
-        // Add event listener for the screenshot button
-        $('#screenshot-button').on('click', function (event) {
-            event.preventDefault();
-            takeFullPageScreenshotAndSaveAsPDF();
-        });
-
-        // Function to capture full-page screenshot and save as PDF
-        function takeFullPageScreenshotAndSaveAsPDF() {
-            // Use html2canvas to capture the entire page
-            html2canvas(document.body).then(function (canvas) {
-                // Convert the canvas to an image data URL
-                var imageDataURL = canvas.toDataURL('image/png');
-
-                // Send the image data URL to the server to convert it to a PDF
-                // Create a form data object to send the image data URL
-                var formData = new FormData();
-                formData.append('image_data_url', imageDataURL);
-
-                // Make a POST request to the Django view using $.ajax()
-                $.ajax({
-                    url: '/convert_to_pdf/',
-                    type: 'POST',
-                    data: formData,
-                    contentType: false,
-                    processData: false,
-                    beforeSend: function (xhr) {
-                        // Include the CSRF token in the request headers
-                        xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
-                    },
-                    success: function (data) {
-                        // Create a link to download the PDF
-                        var downloadLink = document.createElement('a');
-                        downloadLink.href = URL.createObjectURL(data);
-                        downloadLink.download = 'screenshot.pdf';
-
-                        // Click the link to trigger the download
-                        downloadLink.click();
-                    },
-                    error: function (xhr, textStatus, errorThrown) {
-                        console.error('Error while converting to PDF:', errorThrown);
-                    },
-                });
-            });
-        }
-
-        // Function to get the CSRF token from the cookie
-        function getCookie(name) {
-            var cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                var cookies = document.cookie.split(';');
-                for (var i = 0; i < cookies.length; i++) {
-                    var cookie = cookies[i].trim();
-                    // Does this cookie string begin with the name we want?
-                    if (cookie.substring(0, name.length + 1) === name + '=') {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
-        }
-    });
-</script>
 
 {% endblock %}
