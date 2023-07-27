@@ -45,6 +45,48 @@
         });
     });
 </script>
+<!-- Include the html2pdf.js library via CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
+
+<script>
+  // Function to take a screenshot of the entire HTML page and convert it to PDF
+  function downloadPDF() {
+    const filename = 'screenshot.pdf';
+    const element = document.body; // Change this to the specific element you want to capture (e.g., a container div)
+
+    // Set the options for html2pdf.js
+    const options = {
+      margin: 10,
+      filename: filename,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, logging: true },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    // Use html2pdf.js to generate the PDF
+    html2pdf().from(element).set(options).outputPdf().then((pdf) => {
+      const downloadLink = document.createElement('a');
+      const blob = new Blob([pdf], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+
+      downloadLink.href = url;
+      downloadLink.download = filename;
+      downloadLink.click();
+
+      // Clean up the blob URL
+      URL.revokeObjectURL(url);
+    });
+  }
+
+  // Attach the downloadPDF function to the button click event
+  document.addEventListener('DOMContentLoaded', function() {
+    const downloadButton = document.getElementById('downloadButton');
+    if (downloadButton) {
+      downloadButton.addEventListener('click', downloadPDF);
+    }
+  });
+</script>
+
 <section>
     {% if messages %}
     {% for message in messages %}
@@ -81,7 +123,8 @@
                 </div>
 
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
+                <button class="btn btn-primary btn-lg" id="downloadButton">Download PDF</button>
             </div>
             <div class="col-md-4">
 
