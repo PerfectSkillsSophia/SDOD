@@ -232,7 +232,7 @@
 
 <script>
     function captureAndConvertToPDF() {
-      const contentElement = document.getElementById('your-application-content'); // Replace with the ID of the element containing your application content
+      const contentElement = document.getElementById('pdf-content'); // Replace with the ID of the element containing your application content
   
       // Capture the full content using html2canvas
       html2canvas(contentElement, { useCORS: true }).then((canvas) => {
