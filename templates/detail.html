@@ -221,10 +221,9 @@
 <!-- JavaScript code for screenshot functionality -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    $(document).ready(function () {
         // Add event listener for the screenshot button
-        var screenshotButton = document.querySelector('#screenshot-button');
-        screenshotButton.addEventListener('click', function (event) {
+        $('#screenshot-button').on('click', function (event) {
             event.preventDefault();
             takeFullPageScreenshotAndSaveAsPDF();
         });
@@ -241,34 +240,29 @@
                 var formData = new FormData();
                 formData.append('image_data_url', imageDataURL);
 
-                // Make a POST request to the Django view using Fetch API
-                fetch('/convert_to_pdf/', {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        // Make sure to include the CSRF token in the request headers
-                        'X-CSRFToken': getCookie('csrftoken'),
+                // Make a POST request to the Django view using $.ajax()
+                $.ajax({
+                    url: '/convert_to_pdf/',
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    beforeSend: function (xhr) {
+                        // Include the CSRF token in the request headers
+                        xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
                     },
-                })
-                .then(function (response) {
-                    // Check if the response is successful and return the PDF
-                    if (response.ok) {
-                        return response.blob();
-                    } else {
-                        throw new Error('Network response was not ok.');
-                    }
-                })
-                .then(function (pdfBlob) {
-                    // Create a link to download the PDF
-                    var downloadLink = document.createElement('a');
-                    downloadLink.href = URL.createObjectURL(pdfBlob);
-                    downloadLink.download = 'screenshot.pdf';
+                    success: function (data) {
+                        // Create a link to download the PDF
+                        var downloadLink = document.createElement('a');
+                        downloadLink.href = URL.createObjectURL(data);
+                        downloadLink.download = 'screenshot.pdf';
 
-                    // Click the link to trigger the download
-                    downloadLink.click();
-                })
-                .catch(function (error) {
-                    console.error('Error while converting to PDF:', error);
+                        // Click the link to trigger the download
+                        downloadLink.click();
+                    },
+                    error: function (xhr, textStatus, errorThrown) {
+                        console.error('Error while converting to PDF:', errorThrown);
+                    },
                 });
             });
         }
