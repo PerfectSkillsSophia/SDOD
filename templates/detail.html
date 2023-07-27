@@ -82,7 +82,8 @@
 
             </div>
             <div class="col-md-4">
-            
+                <!-- Button for taking a full-page screenshot -->
+<button class="btn btn-primary btn-lg" id="screenshot-button">Take Full Page Screenshot and Save as PDF</button>
             </div>
             <div class="col-md-4">
 
@@ -217,6 +218,31 @@
 </section>
 
 
+<!-- JavaScript code for screenshot functionality -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.5.0-beta4/html2canvas.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Add event listener for the screenshot button
+        var screenshotButton = document.querySelector('#screenshot-button');
+        screenshotButton.addEventListener('click', function (event) {
+            event.preventDefault();
+            takeFullPageScreenshotAndSaveAsPDF();
+        });
 
+        // Function to capture full-page screenshot and save as PDF
+        function takeFullPageScreenshotAndSaveAsPDF() {
+            // Use html2canvas to capture the entire page
+            html2canvas(document.body).then(function (canvas) {
+                // Convert the canvas to an image data URL
+                var imageDataURL = canvas.toDataURL('image/png');
+
+                // Send the image data URL to the server to convert it to a PDF
+                // Implement the server-side functionality (see Step 2 below).
+
+                // ...
+            });
+        }
+    });
+</script>
 
 {% endblock %}
