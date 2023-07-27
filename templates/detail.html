@@ -45,7 +45,7 @@
         });
     });
 </script>
-
+<section id="pdfdata">
 
 <section>
     {% if messages %}
@@ -93,7 +93,7 @@
   // Function to take a screenshot of the entire HTML page and convert it to PDF
   function downloadPDF() {
     const filename = 'screenshot.pdf';
-    const element = document.body; // Change this to the specific element you want to capture (e.g., a container div)
+    const element = document.pdfdata; // Change this to the specific element you want to capture (e.g., a container div)
 
     // Set the options for html2pdf.js
     const options = {
@@ -258,6 +258,6 @@
     {% endfor %}
 
 </section>
-
+</section>
 
 {% endblock %}
