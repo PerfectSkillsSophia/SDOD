@@ -85,7 +85,7 @@
             </div>
             <div class="col-md-3">
                 <!-- Add a button to trigger PDF generation -->
-<button class="btn btn-primary" onclick="generatePDF()">Generate PDF</button>
+
 
             </div>
 
@@ -220,6 +220,7 @@
     {% endfor %}
 
 </section>
+<button class="btn btn-primary" onclick="generatePDF()">Generate PDF</button>
 
 <!-- Add the html2pdf.js script -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -228,6 +229,7 @@
     // Function to generate PDF
     function generatePDF() {
         const element = document.querySelector('#pdf-content');
+        console.log('Element:', element); // Check if the element is found correctly
         const options = {
             margin: [10, 10, 10, 10],
             filename: 'your_pdf_filename.pdf',
