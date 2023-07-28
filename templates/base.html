@@ -2,6 +2,8 @@
 <html lang="en">
 
 <head>
+
+
   <!-- Required meta tags -->
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -53,6 +55,7 @@
     <h2 style=" color:rgb(255, 255, 255); margin-right: 10px;">Hi Admin </h2>
     <a class="btn btn-primary" style="text-align:center;margin-right: 10px;" href="{% url 'addassessment' %}"
       role="button">Add Assessment</a>
+      <a class="btn btn-primary "style="text-align:center;margin-right: 10px; " href="#" id="back-button">Back</a>
     <a class="btn btn-danger" style="text-align:center; margin-right: 10px;" href="{% url 'logout' %}"
       role="button">Logout</a>
   </div>
@@ -94,7 +97,11 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"
     integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
     crossorigin="anonymous"></script>
-    <!-- Include the html2pdf.js library via CDN -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.8.0/html2pdf.bundle.min.js"></script>
+ 
+
+
+
+   <!-- Include the html2pdf.js library -->
+   
 </body>
 </html>

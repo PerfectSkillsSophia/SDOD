@@ -236,6 +236,21 @@ from statistics import mean
 import random
 import string
 from .faceanalysis import analyze_video_emotions
+from django.shortcuts import render
+from django.http import HttpResponse, FileResponse
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from io import BytesIO
+from PIL import Image
+import os
+from selenium.common.exceptions import TimeoutException
+
+
+
+
 
  ##########   Dashboard View   ##########
 @staff_member_required
@@ -256,15 +271,14 @@ def allAnswer(request):
     return render(request, 'submmision.html', {'all_data': all_data})
 
  ##########   Result View   ##########
-@staff_member_required
-@login_required(login_url='login')
+
 def detail_view(request, user_name, assessment_name, identi):
     url = settings.MEDIA_URL
     # Retrieves submission_status objects for the given user name, assessment name, and identi
     sub_status = submission_status.objects.filter(user_name=user_name, assessment_name=assessment_name, identi=identi)
     # Retrieves videoAns objects for the given user name, assessment name, and identi
     data = videoAns.objects.filter(user_name=user_name, assessment_name=assessment_name, identi=identi)
-    return render(request, 'detail.html', {'data': data, 'sub_status': sub_status, 'url': url, 'user_name': user_name})
+    return render(request, 'detail.html', {'data': data, 'sub_status': sub_status, 'url': url, 'user_name': user_name,'assessment_name': assessment_name,'identi': identi})
 
  ##########   Add Assessments template View   ##########
 @staff_member_required
@@ -420,5 +434,73 @@ def run_task(request):
         messages.success(request, 'Result is generated Successfully.')
     return HttpResponseRedirect(ref_url, {'mean_acc': mean_acc})
 
+
+
+ ##########   Result View   ##########
+
+
+def take_screenshot_and_return_as_pdf(request, slug1, slug2, slug3):
+    # Assuming your URL pattern for the detail view is /administration/detail/slug1/slug2/slug3/
+    # Replace the below line with the correct URL for your detail view.
+    url = f'https://psautoscreen.com/administration/detail/{slug1}/{slug2}/{slug3}/'
+    
+    # Configure Chrome options to run in headless mode (without a visible browser window).
+    chrome_options = Options()
+    chrome_options.add_argument('--headless')
+    chrome_options.add_argument('--disable-gpu')
+    chrome_options.add_argument('--no-sandbox')
+    chrome_options.add_argument('--start-maximized')  # Open the browser in maximized mode to capture the full page.
+    
+    # Create a Chrome WebDriver instance.
+    driver = webdriver.Chrome(options=chrome_options)
+    
+    # Load the URL in the WebDriver.
+    driver.get(url)
+    
+    # Wait for the page to load completely by waiting for a specific element on the page.
+    try:
+        element_present = EC.presence_of_element_located((By.TAG_NAME, 'video'))
+        WebDriverWait(driver, 30).until(element_present)
+    except TimeoutException as e:
+        print("Timeout: The page was not fully loaded within the specified time.")
+        # Handle the TimeoutException here. You can raise an error or take appropriate action.
+        driver.quit()
+        return HttpResponse("The page was not fully loaded within the specified time.", status=500)
+    
+    # Get the total height of the webpage.
+    total_height = driver.execute_script("return document.body.scrollHeight")
+    
+    # Set the viewport size to the full height of the webpage.
+    driver.set_window_size(driver.execute_script("return window.innerWidth"), total_height)
+    
+    # Capture the full-page screenshot by scrolling and capturing each part.
+    screenshot = b""
+    while True:
+        # Capture the current visible part of the page.
+        part_screenshot = driver.get_screenshot_as_png()
+        screenshot += part_screenshot
+        
+        # Scroll down the page by the viewport height.
+        driver.execute_script(f"window.scrollTo(0, {driver.execute_script('return window.scrollY') + driver.execute_script('return window.innerHeight')});")
+        
+        # Check if we have reached the bottom of the page.
+        if driver.execute_script("return window.scrollY + window.innerHeight >= document.body.scrollHeight"):
+            break
+    
+    # Close the WebDriver.
+    driver.quit()
+    
+    # Convert the screenshot from PNG to RGB mode before saving as a PDF.
+    image = Image.open(BytesIO(screenshot)).convert('RGB')
+    pdf_buffer = BytesIO()
+    image.save(pdf_buffer, format='PDF')
+    
+    # Serve the PDF as a downloadable file.
+    pdf_filename = f'{slug1}_Result(Sophia).pdf'
+    response = HttpResponse(pdf_buffer.getvalue(), content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="{pdf_filename}"'
+    
+    return response
+ 
 
 
