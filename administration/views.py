@@ -236,17 +236,6 @@ from statistics import mean
 import random
 import string
 from .faceanalysis import analyze_video_emotions
-from django.shortcuts import render
-from django.http import HttpResponse, FileResponse
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from io import BytesIO
-from PIL import Image
-import os
-from selenium.common.exceptions import TimeoutException
 
 import os
 import time
@@ -561,7 +550,7 @@ def convert_image_to_pdf(input_image_path, output_pdf_path):
     c.save()
 
 def take_screenshot_and_return_as_pdf(request, slug1, slug2, slug3):
-    url = f'http://127.0.0.1:8000/administration/detail/{slug1}/{slug2}/{slug3}/'
+    url = f'https://psautoscreen.com/administration/detail/{slug1}/{slug2}/{slug3}/'
     output_filename = f"{slug1}.pdf"
 
     pdf_path = take_full_page_screenshot(url, output_filename)
