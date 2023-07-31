@@ -520,13 +520,12 @@ def run_task(request):
 
 
 
-def take_full_page_screenshot(url, output_filename):
+""" def take_full_page_screenshot(url, output_filename):
     # Set up the Selenium WebDriver
     options = webdriver.ChromeOptions()
     options.add_argument("--headless")
     options.add_argument('--no-sandbox')
     options.add_argument("--start-maximized")
-    options.add_argument("--retry-conn-refused")
     
     driver = webdriver.Chrome(options=options)
 
@@ -540,14 +539,42 @@ def take_full_page_screenshot(url, output_filename):
         # Get the page height
         total_height = driver.execute_script("return document.body.scrollHeight")
 
-             # Get the page height
+        # Set the window size to the page height
+        driver.set_window_size(driver.execute_script("return window.innerWidth"), total_height)
+
+        # Save the screenshot
+        screenshot_path = os.path.join(os.getcwd(), "screenshot.png")
+        driver.save_screenshot(screenshot_path)
+
+        # Convert the screenshot to PDF using reportlab
+        pdf_path = os.path.join(os.getcwd(), output_filename)
+        convert_image_to_pdf(screenshot_path, pdf_path)
+
+        return pdf_path
+
+    finally:
+        driver.quit()
+ """
+def take_full_page_screenshot(url, output_filename):
+    # Set up the Selenium WebDriver
+    options = webdriver.ChromeOptions()
+    options.add_argument("--headless")
+    options.add_argument('--no-sandbox')
+    options.add_argument("--start-maximized")
+    driver = webdriver.Chrome(options=options)
+
+    try:
+        # Navigate to the URL
+        driver.get(url)
+
+        # Wait for the page to load completely
+        time.sleep(5)  # Adjust the sleep time if needed
+
+        # Get the page height
         total_height = driver.execute_script("return document.body.scrollHeight")
 
-        # Get the original window size
-        original_window_size = driver.execute_script("return [window.innerWidth, window.innerHeight]")
-
-        # Calculate the width based on the aspect ratio
-        aspect_ratio = original_window_size[0] / original_window_size[1]
+        # Calculate the width based on the desired aspect ratio (e.g., 16:9)
+        aspect_ratio = 16 / 9  # Adjust this value based on your desired aspect ratio
         width = int(total_height * aspect_ratio)
 
         # Set the window size to maintain the aspect ratio
@@ -556,7 +583,6 @@ def take_full_page_screenshot(url, output_filename):
         # Save the screenshot
         screenshot_path = os.path.join(os.getcwd(), "screenshot.png")
         driver.save_screenshot(screenshot_path)
-
 
         # Convert the screenshot to PDF using reportlab
         pdf_path = os.path.join(os.getcwd(), output_filename)
