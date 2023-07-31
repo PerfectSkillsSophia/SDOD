@@ -520,13 +520,23 @@ def run_task(request):
 
 
 
+import os
+import time
+from django.shortcuts import render
+from django.http import HttpResponse
+from selenium import webdriver
+from pyppeteer import launch
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.utils import ImageReader
+from reportlab.pdfgen import canvas
+from PIL import Image
+
 def take_full_page_screenshot(url, output_filename):
     # Set up the Selenium WebDriver
     options = webdriver.ChromeOptions()
     options.add_argument("--headless")
     options.add_argument('--no-sandbox')
     options.add_argument("--start-maximized")
-    
     driver = webdriver.Chrome(options=options)
 
     try:
