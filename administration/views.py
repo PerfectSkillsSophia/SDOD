@@ -524,7 +524,9 @@ def take_full_page_screenshot(url, output_filename):
     # Set up the Selenium WebDriver
     options = webdriver.ChromeOptions()
     options.add_argument("--headless")
+    options.add_argument('--no-sandbox')
     options.add_argument("--start-maximized")
+    
     driver = webdriver.Chrome(options=options)
 
     try:
