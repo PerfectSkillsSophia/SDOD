@@ -248,6 +248,16 @@ from PIL import Image
 import os
 from selenium.common.exceptions import TimeoutException
 
+import os
+import time
+from django.shortcuts import render
+from django.http import HttpResponse
+from selenium import webdriver
+from pyppeteer import launch
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.utils import ImageReader
+from reportlab.pdfgen import canvas
+from PIL import Image
 
 
 
@@ -438,11 +448,10 @@ def run_task(request):
 
  ##########   Result View   ##########
 
-
-def take_screenshot_and_return_as_pdf(request, slug1, slug2, slug3):
+""" def take_screenshot_and_return_as_pdf(request, slug1, slug2, slug3):
     # Assuming your URL pattern for the detail view is /administration/detail/slug1/slug2/slug3/
     # Replace the below line with the correct URL for your detail view.
-    url = f'https://psautoscreen.com/administration/detail/{slug1}/{slug2}/{slug3}/'
+    url = f'http://127.0.0.1:8000/administration/detail/{slug1}/{slug2}/{slug3}/'
     
     # Configure Chrome options to run in headless mode (without a visible browser window).
     chrome_options = Options()
@@ -450,6 +459,9 @@ def take_screenshot_and_return_as_pdf(request, slug1, slug2, slug3):
     chrome_options.add_argument('--disable-gpu')
     chrome_options.add_argument('--no-sandbox')
     chrome_options.add_argument('--start-maximized')  # Open the browser in maximized mode to capture the full page.
+
+
+    
     
     # Create a Chrome WebDriver instance.
     driver = webdriver.Chrome(options=chrome_options)
@@ -501,6 +513,58 @@ def take_screenshot_and_return_as_pdf(request, slug1, slug2, slug3):
     response['Content-Disposition'] = f'attachment; filename="{pdf_filename}"'
     
     return response
- 
 
 
+
+ """
+
+
+
+def take_full_page_screenshot(url, output_filename):
+    # Set up the Selenium WebDriver
+    options = webdriver.ChromeOptions()
+    options.add_argument("--headless")
+    options.add_argument("--start-maximized")
+    driver = webdriver.Chrome(options=options)
+
+    try:
+        # Navigate to the URL
+        driver.get(url)
+
+        # Wait for the page to load completely
+        time.sleep(5)  # Adjust the sleep time if needed
+
+        # Get the page height
+        total_height = driver.execute_script("return document.body.scrollHeight")
+
+        # Set the window size to the page height
+        driver.set_window_size(driver.execute_script("return window.innerWidth"), total_height)
+
+        # Save the screenshot
+        screenshot_path = os.path.join(os.getcwd(), "screenshot.png")
+        driver.save_screenshot(screenshot_path)
+
+        # Convert the screenshot to PDF using reportlab
+        pdf_path = os.path.join(os.getcwd(), output_filename)
+        convert_image_to_pdf(screenshot_path, pdf_path)
+
+        return pdf_path
+
+    finally:
+        driver.quit()
+
+def convert_image_to_pdf(input_image_path, output_pdf_path):
+    c = canvas.Canvas(output_pdf_path, pagesize=letter)
+    img = ImageReader(input_image_path)
+    c.drawImage(img, 0, 0, width=letter[0], height=letter[1])
+    c.save()
+
+def take_screenshot_and_return_as_pdf(request, slug1, slug2, slug3):
+    url = f'https://psautoscreen.com/administration/detail/{slug1}/{slug2}/{slug3}/'
+    output_filename = f"{slug1}.pdf"
+
+    pdf_path = take_full_page_screenshot(url, output_filename)
+    with open(pdf_path, 'rb') as pdf_file:
+        response = HttpResponse(pdf_file.read(), content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="{output_filename}"'
+        return response
