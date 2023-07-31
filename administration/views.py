@@ -519,22 +519,11 @@ def run_task(request):
  """
 
 
-
-import os
-import time
-from django.shortcuts import render
-from django.http import HttpResponse
-from selenium import webdriver
-from pyppeteer import launch
-from reportlab.lib.pagesizes import letter
-from reportlab.lib.utils import ImageReader
-from reportlab.pdfgen import canvas
-from PIL import Image
-
 def take_full_page_screenshot(url, output_filename):
     # Set up the Selenium WebDriver
     options = webdriver.ChromeOptions()
     options.add_argument("--headless")
+    options.add_argument('--disable-gpu')
     options.add_argument('--no-sandbox')
     options.add_argument("--start-maximized")
     driver = webdriver.Chrome(options=options)
@@ -572,7 +561,7 @@ def convert_image_to_pdf(input_image_path, output_pdf_path):
     c.save()
 
 def take_screenshot_and_return_as_pdf(request, slug1, slug2, slug3):
-    url = f'https://psautoscreen.com/administration/detail/{slug1}/{slug2}/{slug3}/'
+    url = f'http://127.0.0.1:8000/administration/detail/{slug1}/{slug2}/{slug3}/'
     output_filename = f"{slug1}.pdf"
 
     pdf_path = take_full_page_screenshot(url, output_filename)
