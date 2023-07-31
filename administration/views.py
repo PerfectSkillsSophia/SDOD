@@ -508,7 +508,7 @@ def run_task(request):
  """
 
 
-def take_full_page_screenshot(url, output_filename):
+""" def take_full_page_screenshot(url, output_filename):
     # Set up the Selenium WebDriver
     options = webdriver.ChromeOptions()
     options.add_argument("--headless")
@@ -558,3 +558,76 @@ def take_screenshot_and_return_as_pdf(request, slug1, slug2, slug3):
         response = HttpResponse(pdf_file.read(), content_type='application/pdf')
         response['Content-Disposition'] = f'attachment; filename="{output_filename}"'
         return response
+ """
+
+
+from django.http import HttpResponse
+from django.shortcuts import render
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.chrome.options import Options
+import time
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+import io
+
+def take_full_page_screenshot(url, save_path):
+    # Set up the Chrome options to run in headless mode (without opening a browser window)
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--window-size=1920x1080")  # Set the window size to emulate a full-sized screen
+
+    # Initialize the WebDriver
+    driver = webdriver.Chrome(options=chrome_options)
+
+    try:
+        # Open the URL in the WebDriver
+        driver.get(url)
+
+        # Wait for the page to load completely (increase the timeout if needed)
+        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, 'body')))
+
+        # Wait for some additional time to ensure dynamic elements like video load
+        time.sleep(5)
+
+        # Get the height of the entire page
+        total_height = driver.execute_script("return Math.max( document.body.scrollHeight, document.body.offsetHeight, document.documentElement.clientHeight, document.documentElement.scrollHeight, document.documentElement.offsetHeight );")
+
+        # Set the window height to the height of the entire page
+        driver.set_window_size(1920, total_height)
+
+        # Take a screenshot of the entire page
+        screenshot_path = "screenshot.png"
+        driver.save_screenshot(screenshot_path)
+
+        # Generate the PDF using ReportLab
+        c = canvas.Canvas(save_path, pagesize=letter)
+        c.drawImage(screenshot_path, 0, 0, width=letter[0], height=letter[1])
+        c.save()
+
+    finally:
+        # Close the WebDriver
+        driver.quit()
+
+# Django view function to capture screenshot and generate PDF
+def capture_screenshot_view(request, slug1, slug2, slug3):
+    url_to_capture = f'https://psautoscreen.com/administration/detail/{slug1}/{slug2}/{slug3}/'  # Replace with the actual URL you want to capture
+
+    # Create a temporary buffer to store the PDF content
+    buffer = io.BytesIO()
+
+    # Capture the screenshot and generate the PDF
+    take_full_page_screenshot(url_to_capture, buffer)
+
+    # Generate the PDF using ReportLab
+    buffer.seek(0)
+    c = canvas.Canvas(buffer, pagesize=letter)
+    c.drawImage(buffer, 0, 0, width=letter[0], height=letter[1])
+    c.save()
+
+    # Prepare the HTTP response with the PDF content as an attachment
+    response = HttpResponse(buffer.getvalue(), content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="screenshot.pdf"'
+    return response
