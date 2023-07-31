@@ -526,6 +526,7 @@ def take_full_page_screenshot(url, output_filename):
     options.add_argument("--headless")
     options.add_argument('--no-sandbox')
     options.add_argument("--start-maximized")
+    
     driver = webdriver.Chrome(options=options)
 
     try:
@@ -538,10 +539,8 @@ def take_full_page_screenshot(url, output_filename):
         # Get the page height
         total_height = driver.execute_script("return document.body.scrollHeight")
 
-        # Set the window size to match the page height and maintain aspect ratio
-        aspect_ratio = 16 / 9  # Adjust this value based on your desired aspect ratio
-        width = int(total_height * aspect_ratio)
-        driver.set_window_size(width, total_height)
+        # Set the window size to the page height
+        driver.set_window_size(driver.execute_script("return window.innerWidth"), total_height+1000)
 
         # Save the screenshot
         screenshot_path = os.path.join(os.getcwd(), "screenshot.png")
