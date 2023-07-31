@@ -526,6 +526,7 @@ def take_full_page_screenshot(url, output_filename):
     options.add_argument("--headless")
     options.add_argument('--no-sandbox')
     options.add_argument("--start-maximized")
+    options.add_argument("--retry-conn-refused")
     
     driver = webdriver.Chrome(options=options)
 
