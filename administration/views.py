@@ -539,12 +539,23 @@ def take_full_page_screenshot(url, output_filename):
         # Get the page height
         total_height = driver.execute_script("return document.body.scrollHeight")
 
-        # Set the window size to the page height
-        driver.set_window_size(driver.execute_script("return window.innerWidth"), total_height+1000)
+             # Get the page height
+        total_height = driver.execute_script("return document.body.scrollHeight")
+
+        # Get the original window size
+        original_window_size = driver.execute_script("return [window.innerWidth, window.innerHeight]")
+
+        # Calculate the width based on the aspect ratio
+        aspect_ratio = original_window_size[0] / original_window_size[1]
+        width = int(total_height * aspect_ratio)
+
+        # Set the window size to maintain the aspect ratio
+        driver.set_window_size(width, total_height)
 
         # Save the screenshot
         screenshot_path = os.path.join(os.getcwd(), "screenshot.png")
         driver.save_screenshot(screenshot_path)
+
 
         # Convert the screenshot to PDF using reportlab
         pdf_path = os.path.join(os.getcwd(), output_filename)
