@@ -577,6 +577,8 @@ def take_full_page_screenshot(url, save_path):
     # Set up the Chrome options to run in headless mode (without opening a browser window)
     chrome_options = Options()
     chrome_options.add_argument("--headless")
+    chrome_options.add_argument('--disable-gpu')
+    chrome_options.add_argument('--no-sandbox')
     chrome_options.add_argument("--window-size=1920x1080")  # Set the window size to emulate a full-sized screen
 
     # Initialize the WebDriver
