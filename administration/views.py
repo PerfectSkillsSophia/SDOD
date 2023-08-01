@@ -473,8 +473,8 @@ def take_full_page_screenshot(url):
 
         return screenshot_image
     except Exception as e:
-        print("Error: ", e)
-        return None
+        return f"Error: {e}\nFailed to capture the full-page screenshot for URL: {url}"
+
 
 def generate_pdf_from_screenshot(screenshot):
     # Create a new PDF buffer
@@ -492,11 +492,12 @@ def screenshot_to_pdf(request, slug1, slug2, slug3):
     # Create the URL using the provided slugs
     html_page_url = f"https://psautoscreen.com/administration/detail/{slug1}/{slug2}/{slug3}/"
     full_page_screenshot = take_full_page_screenshot(html_page_url)
-    if full_page_screenshot:
-        pdf_buffer = generate_pdf_from_screenshot(full_page_screenshot)
-        # Set the appropriate response headers for a PDF file
-        response = HttpResponse(pdf_buffer, content_type='application/pdf')
-        response['Content-Disposition'] = 'attachment; filename="Result.pdf"'
-        return response
-    # No need for else here; if the full-page screenshot fails, it will automatically return the error response
-    return HttpResponse("Failed to capture the full-page screenshot.")
+    if isinstance(full_page_screenshot, str):
+        # Return the debug information as an HttpResponse
+        return HttpResponse(full_page_screenshot)
+
+    pdf_buffer = generate_pdf_from_screenshot(full_page_screenshot)
+    # Set the appropriate response headers for a PDF file
+    response = HttpResponse(pdf_buffer, content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="Result.pdf"'
+    return response
