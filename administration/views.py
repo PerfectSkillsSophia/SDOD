@@ -490,7 +490,7 @@ def generate_pdf_from_screenshot(screenshot):
 
 def screenshot_to_pdf(request, slug1, slug2, slug3):
     # Replace 'your_html_page_url' with the actual URL of the HTML page you want to capture
-    html_page_url = f'https://psautoscreen.com/administration/detail/{slug1}/{slug2}/{slug3}/'
+    html_page_url = f"https://psautoscreen.com/administration/detail/{slug1}/{slug2}/{slug3}/"
     full_page_screenshot = take_full_page_screenshot(html_page_url)
     if full_page_screenshot:
         pdf_buffer = generate_pdf_from_screenshot(full_page_screenshot)
