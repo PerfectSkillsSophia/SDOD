@@ -449,11 +449,7 @@ def take_full_page_screenshot(url):
         chrome_options.add_argument("--headless")
         # Create a new instance of the Chrome driver
         driver = webdriver.Chrome(options=chrome_options)
-        # Set up the Selenium WebDriver
-        chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_argument("--headless")
-        chrome_options.add_argument("--start-maximized")
-        chrome_options = webdriver.Chrome(options=Options)
+        
         # Load the HTML page
         driver.get(url)
 
