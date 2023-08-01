@@ -447,11 +447,15 @@ def take_full_page_screenshot(url):
         chrome_options = Options()
         # Use the headless mode to run without opening a browser window
         chrome_options.add_argument("--headless")
+        # Add --no-sandbox and --disable-gpu arguments
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-gpu")
         # Create a new instance of the Chrome driver
         driver = webdriver.Chrome(options=chrome_options)
-        
+
         # Load the HTML page
         driver.get(url)
+
 
         # Wait for the page to load completely (you can adjust the time depending on the page's content)
         time.sleep(5)
