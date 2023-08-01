@@ -489,14 +489,14 @@ def generate_pdf_from_screenshot(screenshot):
     return pdf_buffer.getvalue()
 
 def screenshot_to_pdf(request, slug1, slug2, slug3):
-    # Replace 'your_html_page_url' with the actual URL of the HTML page you want to capture
+    # Create the URL using the provided slugs
     html_page_url = f"https://psautoscreen.com/administration/detail/{slug1}/{slug2}/{slug3}/"
     full_page_screenshot = take_full_page_screenshot(html_page_url)
     if full_page_screenshot:
         pdf_buffer = generate_pdf_from_screenshot(full_page_screenshot)
         # Set the appropriate response headers for a PDF file
         response = HttpResponse(pdf_buffer, content_type='application/pdf')
-        response['Content-Disposition'] = 'attachment; filename= "Result.pdf"'
+        response['Content-Disposition'] = 'attachment; filename="Result.pdf"'
         return response
-    else:
-        return HttpResponse("Failed to capture the full-page screenshot.")
+    # No need for else here; if the full-page screenshot fails, it will automatically return the error response
+    return HttpResponse("Failed to capture the full-page screenshot.")
