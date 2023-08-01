@@ -87,8 +87,7 @@
         <div class="row">      
             <div class="col-md-9"></div>       
                <div class="col-md-3" style="text-align:right; ">
-                <a href="{% url 'screenshot_view' slug1=slug1 slug2=slug2 slug3=slug3 %}" target="_blank">Download PDF</a>      </div></div>
-    </div>
+                <a href="{% url 'screenshot_view' slug1=user_name slug2=assessment_name slug3=identi %}" target="_blank">Download PDF</a>    </div>
     {% for i in sub_status %}
     {% if i.result_generate %}
     {% for item in data %}
