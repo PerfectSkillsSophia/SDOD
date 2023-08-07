@@ -61,6 +61,19 @@
 <body>
   {% block content %}
 
+
+<script>
+        // Function to go back to the previous page and reload it
+        function goBackAndReload() {
+            window.history.back();
+            location.reload();
+        }
+
+        // Adding an event listener to the back button element
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById("backButton").addEventListener("click", goBackAndReload);
+        });
+    </script>
   {% endblock %}
   <!-- Optional JavaScript -->
 
@@ -75,18 +88,7 @@
     crossorigin="anonymous"></script>
  
 
-    <script>
-      // Function to go back to the previous page and reload it
-      function goBackAndReload() {
-        window.history.back();
-        location.reload();
-      }
-      
-      // Adding an event listener to the back button element
-      document.getElementById("backButton").addEventListener("click", goBackAndReload);
-      
-      
-      </script>
+   
 
    <!-- Include the html2pdf.js library -->
    
