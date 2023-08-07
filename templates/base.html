@@ -2,7 +2,8 @@
 <html lang="en">
 
 <head>
-
+  
+  <!-- {{ request.path }} -->
 
   <!-- Required meta tags -->
   <meta charset="utf-8">
@@ -62,16 +63,17 @@
 </nav>
 {% else %}
 <nav class="navbar navbar-dark bg-dark" style="margin-top: 10px;">
-  <a class="navbar-brand" href="{{ request.path }}">
+  <a class="navbar-brand" href="{% url 'dashboard' %}">
     <img src="{% static 'image/ps.png' %}" width="150" height="45" alt="">
   </a>
   <div class="form-inline" style="margin: 5px 5px 5px 5px 5px;">
-    <h1 style=" color:rgb(255, 255, 255);">Hi <span id="username"
-      style="text-transform:capitalize; margin-right:10px;">{{ user.first_name }} </span></h1>
-
-      <a class="btn btn-primary" href="#" id="back-button" style="text-align:center; margin-right: 10px;">Back</a>
+    <h2 style=" color:rgb(255, 255, 255); margin-right: 10px;">{{ user.first_name }}</h2>
+      <a class="btn btn-primary "style="text-align:center;margin-right: 10px; " href="#" id="back-button">Back</a>
+    <a class="btn btn-danger" style="text-align:center; margin-right: 10px;" href="{% url 'logout' %}"
+      role="button">Logout</a>
   </div>
 </nav>
+
 {% endif %}
 
 {% else %}
