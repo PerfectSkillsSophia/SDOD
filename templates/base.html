@@ -18,14 +18,15 @@
   {% load static %}
 </head>
 <script>
+  // Adding an event listener to the back button element
+document.getElementById("backButton").addEventListener("click", goBackAndReload);
 // Function to go back to the previous page and reload it
 function goBackAndReload() {
   window.history.back();
   location.reload();
 }
 
-// Adding an event listener to the back button element
-document.getElementById("backButton").addEventListener("click", goBackAndReload);
+
 </script>
 
 {% if user.is_authenticated %}
