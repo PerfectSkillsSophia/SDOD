@@ -18,33 +18,16 @@
   {% load static %}
 </head>
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-      var backButton = document.querySelector('#back-button');
-      backButton.addEventListener('click', function(event) {
-          event.preventDefault();
-          window.history.back();
-      });
-  });
+// Function to go back to the previous page and reload it
+function goBackAndReload() {
+  window.history.back();
+  location.reload();
+}
+
+// Adding an event listener to the back button element
+document.getElementById("backButton").addEventListener("click", goBackAndReload);
 </script>
-<!-- backbutton -->
-<script>
-  window.addEventListener('pageshow', function(event) {
-    // If the persisted property is false or undefined, it means the page is being loaded from cache
-    if (event.persisted) {
-      // Force a full page reload
-      window.location.reload();
-    }
-  });
-</script>
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    var backButton = document.querySelector('#back-button');
-    backButton.addEventListener('click', function () {
-      // Force a full page reload
-      window.location.reload();
-    });
-  });
-</script>
+
 {% if user.is_authenticated %}
 <!-- Just an image -->
 {% if request.user.is_staff %}
@@ -56,7 +39,7 @@
     <h2 style=" color:rgb(255, 255, 255); margin-right: 10px;">Hi Admin </h2>
     <a class="btn btn-primary" style="text-align:center;margin-right: 10px;" href="{% url 'addassessment' %}"
       role="button">Add Assessment</a>
-      <a class="btn btn-primary "style="text-align:center;margin-right: 10px; " href="#" id="back-button">Back</a>
+      <a class="btn btn-primary "style="text-align:center;margin-right: 10px; " href="#" id="backButton">Back</a>
     <a class="btn btn-danger" style="text-align:center; margin-right: 10px;" href="{% url 'logout' %}"
       role="button">Logout</a>
   </div>
@@ -68,7 +51,7 @@
   </a>
   <div class="form-inline" style="margin: 5px 5px 5px 5px 5px;">
     <h2 style=" color:rgb(255, 255, 255); margin-right: 10px;">{{ user.first_name }}</h2>
-      <a class="btn btn-primary "style="text-align:center;margin-right: 10px; " href="#" id="back-button">Back</a>
+      <a class="btn btn-primary "style="text-align:center;margin-right: 10px; " href="#" id="backButton">Back</a>
     <a class="btn btn-danger" style="text-align:center; margin-right: 10px;" href="{% url 'logout' %}"
       role="button">Logout</a>
   </div>
