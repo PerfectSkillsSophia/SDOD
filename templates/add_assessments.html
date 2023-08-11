@@ -1,23 +1,10 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
-<script>
-  function validateInput(event) {
-    const inputValue = event.target.value;
-    const firstCharacter = inputValue.charAt(0);
 
-    // Remove spaces
-    event.target.value = inputValue.replace(/\s/g, '');
+  <script src="{% static 'javascript/add_assessments.js' %}"></script>
 
-    // Check for special characters or numbers at the beginning
-    const regex = /^[^A-Za-z]/;
-    if (regex.test(firstCharacter)) {
-      event.target.value = '';
-    }
-  }
-</script>
-
-<br>
+  <section class="vh-100" style="background-color: rgb(255, 255, 255);margin-top: 50px;">
 <div class="container">
   <div class="row">
     <div class="col-md-5">
@@ -36,7 +23,7 @@
 
         <li>Do not start Assessment name with Numbers and special characters. </li>
         <li>Space in the Assessment name is not allowed. </li>
-        <li>Use "_" if wnat please don't use any other characters to avoid conflict. </li>
+        <li>Use "_" if want please don't use any other characters to avoid conflict. </li>
 
       </ol>
     </span>
@@ -53,4 +40,5 @@
   </form>
   <hr>
 </div>
+  </section>
 {% endblock %}

@@ -84,228 +84,224 @@
 
 {% endif %}
 
+
+{% endblock %}
+
+{% block javascript %}
 <script type="text/javascript">
 
-  'use strict';
 
-  /* globals MediaRecorder */
-  let mediaRecorder;
-  let recordedBlobs;
-  var currentQuestion = 0;
-  var blobs = [];
-  var final = [];
-  var allque = [];
-  const questions = document.getElementsByClassName("question");
-  const nextBtn = document.getElementById("nextBtn");
-  const errorMsgElement = document.querySelector('span#errorMsg');
-  const recordedVideo = document.querySelector('video#gum');
-  const recordButton = document.querySelector('button#record');
-  const uploadButton = document.querySelector('button#upload');
-  const startButton = document.querySelector('button#start');
-  const nextButton = document.querySelector('button#next');
+// 'use strict' enforces better coding practices and catches common coding mistakes
+'use strict';
 
-  // Hide all questions except the first one
-  for (var i = 1; i < questions.length; i++) {
-    questions[i].style.display = "none";
-  }
-  // Add event listener to the navigation button
-  nextBtn.addEventListener("click", function () {
-    currentQuestion++;
-    showQuestion(currentQuestion);
-    mediaRecorder.stop();
-    startRecording();
-  });
+// Declare variables for media recording and question handling
+let mediaRecorder;
+let recordedBlobs;
+let currentQuestion = 0;
+const blobs = [];
+const allque = [];
+const questions = document.getElementsByClassName("question");
+const nextBtn = document.getElementById("nextBtn");
+const errorMsgElement = document.querySelector('span#errorMsg');
+const recordedVideo = document.querySelector('video#gum');
+const recordButton = document.querySelector('button#record');
+const uploadButton = document.querySelector('button#upload');
+const startButton = document.querySelector('button#start');
+const nextButton = document.querySelector('button#next');
 
-  //Loop through all the question elements and append them to allque
-  var questionElems = document.querySelectorAll(".question");
-  for (var i = 0; i < questionElems.length; i++) {
-    allque.push(questionElems[i].textContent);
-  }
-
-
-  function showQuestion(n) {
-    // Disable the next button on the last question
-if (n == questions.length-1){
-  nextBtn.innerHTML = "Stop Assessments";
+// Hide all questions except the first one
+for (let i = 1; i < questions.length; i++) {
+  questions[i].style.display = "none";
 }
-    else if (n == questions.length) {
-      mediaRecorder.stop();
-      nextBtn.innerHTML = "Click Stop Button to stopt your Recording.";
-      nextBtn.disabled = true;
-      recordButton.disabled = false;
-    } else {
-      nextBtn.disabled = false;
-    }
 
-    // Hide all questions except the one at index n
-    for (var i = 0; i < questions.length; i++) {
-      if (i == n) {
-        questions[i].style.display = "block";
-      } else {
-        questions[i].style.display = "none";
-      }
-    }
-  }
-
-  async function init(constraints) {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
-      handleSuccess(stream);
-    } catch (e) {
-      console.error('navigator.getUserMedia error:', e);
-      errorMsgElement.innerHTML = `navigator.getUserMedia error:${e.toString()}`;
-    }
-  }
-
-  function handleSuccess(stream) {
-    recordButton.disabled = false;
-    console.log('getUserMedia() got stream:', stream);
-    window.stream = stream;
-
-    const gumVideo = document.querySelector('video#gum');
-    gumVideo.srcObject = stream;
-  }
-
-  startButton.addEventListener('click', async () => {
-    const hasEchoCancellation = document.querySelector('#echoCancellation').checked;
-    const constraints = {
-      audio: {
-        echoCancellation: { exact: hasEchoCancellation }
-      },
-      video: {
-        width: 2040, height: 1080
-      }
-    };
-    console.log('Using media constraints:', constraints);
-    await init(constraints);
-  });
-
-  //record button
-  recordButton.addEventListener('click', () => {
-
-    if (recordButton.textContent === 'Record') {
-      alert("Recording is started")
-      startRecording();
-      recordButton.disabled = true
-      nextBtn.disabled = false;
-    } else {
-      alert("Your answer is recorded review your answer and then submit it!")
-      //stopRecording()
-      recordButton.textContent = 'Record'
-
-      uploadButton.disabled = false
-      startButton.disabled = true
-      recordButton.disabled = true
-    }
-  });
-
-  //startRecording
-  function startRecording() {
-    recordedBlobs = []
-    let options = {
-      MimeType: 'video/webm;codecs=vp9,opus'
-    }
-    try {
-      mediaRecorder = new MediaRecorder(window.stream, options)
-
-
-
-    } catch (e) {
-      console.error('Exception while creating MediaRecorder:', e);
-      return;
-    }
-    recordButton.textContent = 'Stop';
-    uploadButton.disabled = true;
-    mediaRecorder.onstop = (event) => {
-    };
-    mediaRecorder.ondataavailable = handleDataAvailable;
-    mediaRecorder.start();
-    console.log('MediaRecorder started', mediaRecorder);
-  }
-  //handleDataAvailable
-  function handleDataAvailable(event) {
-    if (event.data && event.data.size > 0) {
-      recordedBlobs.push(event.data);
-      createBlob(recordedBlobs);
-    }
-  }
-  // Function to create a blob from recorded blob data
-  function createBlob(recordedBlobs) {
-    // Create a new Blob object from the recorded blob data
-    var videoBlob = new Blob(recordedBlobs, { type: 'video/webm' });
-
-    // Add the blob to the blobs array
-    blobs.push(videoBlob);
-    console.log(blobs)
-
-    // Clear the recorded blob data
-    recordedBlobs = [];
-  }
-
-
-
-
-  function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-      const cookies = document.cookie.split(';');
-      for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        // Does this cookie string begin with the name we want?
-        if (cookie.substring(0, name.length + 1) === (name + '=')) {
-          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-          break;
-        }
-      }
-    }
-    return cookieValue;
-  }
-  let ass_name = document.getElementById("assname").innerHTML;
-  //upload func
-  uploadButton.addEventListener('click', () => {
-    var container = new FormData();
-    for (var i = 0; i < blobs.length; i++) {
-      container.append('video_' + i, blobs[i], 'video_' + i + '.webm');
-    }
-
-    container.append('questions', JSON.stringify(allque));
-    container.append('ass_name', ass_name)
-
-
-
-    $.ajax({
-      type: 'POST',
-      url: 'fileUpload/',
-      headers: { "X-CSRFToken": getCookie("csrftoken") },
-      mode: "same-origin",
-      beforeSend: function () {
-        uploadButton.disabled = true
-        startButton.disabled = true
-        recordButton.disabled = true
-      },
-      success: function () {
-        alert("Your assessment is submited successfully! Exit The Assessment.")
-        document.getElementById("exit").style.visibility = "visible";
-
-      },
-      error: function () { // if error occured
-        alert("Error occured.please try again");
-        uploadButton.disabled = false
-
-      },
-      data: container,
-      processData: false,
-      contentType: false
-    })
-
-
-  });
-
-  //stopRecording
-  function stopRecording() {
+// Add event listener to navigate to the next question
+nextBtn.addEventListener("click", function () {
+  currentQuestion++;
+  showQuestion(currentQuestion);
+  if (mediaRecorder && mediaRecorder.state === "recording") {
     mediaRecorder.stop();
-    document.getElementById("exit").style.visibility = "visible";
+    mediaRecorder.onstop = () => {
+      startRecording();
+    };
+  } else {
+    startRecording();
   }
+});
+
+// Loop through all the question elements and append them to allque
+const questionElems = document.querySelectorAll(".question");
+for (let i = 0; i < questionElems.length; i++) {
+  allque.push(questionElems[i].textContent);
+}
+
+// Show the question at index n and manage button states
+function showQuestion(n) {
+  // Disable the next button on the last question
+  if (n == questions.length - 2) {
+    nextBtn.innerHTML = "Last Question";
+  } else if (n == questions.length - 1) {
+    nextBtn.innerHTML = "Stop Assessment";
+  } else if (n == questions.length) {
+    if (mediaRecorder && mediaRecorder.state === "recording") {
+      mediaRecorder.stop();
+    }
+    nextBtn.innerHTML = "Click Stop Button to stop your Recording.";
+    nextBtn.disabled = true;
+    recordButton.disabled = false;
+  } else {
+    nextBtn.disabled = false;
+  }
+
+  // Hide all questions except the one at index n
+  for (let i = 0; i < questions.length; i++) {
+    questions[i].style.display = i === n ? "block" : "none";
+  }
+}
+
+// Initialize the media stream
+async function init(constraints) {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+    handleSuccess(stream);
+  } catch (e) {
+    console.error('navigator.getUserMedia error:', e);
+    errorMsgElement.innerHTML = `navigator.getUserMedia error:${e.toString()}`;
+  }
+}
+
+// Handle success when getting user media stream
+function handleSuccess(stream) {
+  recordButton.disabled = false;
+  console.log('getUserMedia() got stream:', stream);
+  window.stream = stream;
+
+  const gumVideo = document.querySelector('video#gum');
+  gumVideo.srcObject = stream;
+}
+
+startButton.addEventListener('click', async () => {
+  const hasEchoCancellation = document.querySelector('#echoCancellation').checked;
+  const constraints = {
+    audio: {
+      echoCancellation: { exact: hasEchoCancellation }
+    },
+    video: {
+      width: 2040, height: 1080
+    }
+  };
+  console.log('Using media constraints:', constraints);
+  await init(constraints);
+});
+
+// Record button click event
+recordButton.addEventListener('click', () => {
+  if (recordButton.textContent === 'Record') {
+    alert("Recording is started");
+    startRecording();
+    recordButton.disabled = true;
+    nextBtn.disabled = false;
+  } else {
+    alert("Your answer is recorded. Review your answer and then submit it!");
+    recordButton.textContent = 'Record';
+    uploadButton.disabled = false;
+    startButton.disabled = true;
+    recordButton.disabled = true;
+  }
+});
+
+// Start recording media
+function startRecording() {
+  recordedBlobs = [];
+  const options = {
+    mimeType: 'video/webm;codecs=vp9,opus'
+  };
+  try {
+    mediaRecorder = new MediaRecorder(window.stream, options);
+  } catch (e) {
+    console.error('Exception while creating MediaRecorder:', e);
+    return;
+  }
+  recordButton.textContent = 'Stop';
+  uploadButton.disabled = true;
+  mediaRecorder.onstop = () => {};
+  mediaRecorder.ondataavailable = handleDataAvailable;
+  mediaRecorder.start();
+  console.log('MediaRecorder started', mediaRecorder);
+}
+
+// Handle available data while recording
+function handleDataAvailable(event) {
+  if (event.data && event.data.size > 0) {
+    recordedBlobs.push(event.data);
+    createBlob(recordedBlobs);
+  }
+}
+
+// Create a blob from recorded blob data and store it in blobs array
+function createBlob(recordedBlobs) {
+  const videoBlob = new Blob(recordedBlobs, { type: 'video/webm' });
+  blobs.push(videoBlob);
+  console.log(blobs);
+  recordedBlobs = [];
+}
+
+// Function to get a cookie by name
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+
+// Upload button click event
+uploadButton.addEventListener('click', () => {
+  const container = new FormData();
+  for (let i = 0; i < blobs.length; i++) {
+    container.append('video_' + i, blobs[i], 'video_' + i + '.webm');
+  }
+  container.append('questions', JSON.stringify(allque));
+  const ass_name = document.getElementById("assname").innerHTML;
+  container.append('ass_name', ass_name);
+
+  $.ajax({
+    type: 'POST',
+    url: 'fileUpload/',
+    headers: { "X-CSRFToken": getCookie("csrftoken") },
+    mode: "same-origin",
+    beforeSend: function () {
+      uploadButton.disabled = true;
+      startButton.disabled = true;
+      recordButton.disabled = true;
+    },
+    success: function () {
+      alert("Your assessment is submitted successfully! Exit The Assessment.");
+      document.getElementById("exit").style.visibility = "visible";
+    },
+    error: function () {
+      alert("Error occurred. Please try again.");
+      uploadButton.disabled = false;
+    },
+    data: container,
+    processData: false,
+    contentType: false
+  });
+});
+
+// Stop recording function
+function stopRecording() {
+  if (mediaRecorder && mediaRecorder.state === "recording") {
+    mediaRecorder.stop();
+  }
+  document.getElementById("exit").style.visibility = "visible";
+}
 
 </script>
 
