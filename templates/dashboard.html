@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block content %}
-<section class="vh-100" style="background-color: rgb(255, 255, 255);margin-top: 50px;">
+<br>
 <div class="container">
     <div class="row">
         <div class="col-md-5">
@@ -26,7 +26,7 @@
                 </div>
                 <div class="card-body">
                     <div class="alert alert-primary" role="alert">
-                        Assessment Code: {{ assessment.identi_assessment }}<br>
+                        Assessment Code:{{ assessment.identi_assessment }}<br>
                         <hr>
                         <a href="assessment/{{assessment.assId}}" class="btn btn-primary  btn-block"
                             id="view{{assessment.assId}}">Add Questions.</a>
@@ -39,5 +39,5 @@
         {% endfor %}
     </div>
 </div>
-</section>
+
 {% endblock %}S

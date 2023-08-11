@@ -16,8 +16,7 @@
   <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
   
   <title>Assessment_Tool</title>
-  <link rel="shortcut icon" type="image/x-icon" href="{% static 'image/fa.png' %}">
-
+  
 </head>
 
 
@@ -33,22 +32,18 @@
     <a class="btn btn-primary" style="text-align:center;margin-right: 10px;" href="{% url 'addassessment' %}"
       role="button">Add Assessment</a>
       <a class="btn btn-primary "style="text-align:center;margin-right: 10px; " href="#" role="button" id="backButton">Back</a>
-         <!-- Include the navbar.js JavaScript file -->
-   
     <a class="btn btn-danger" style="text-align:center; margin-right: 10px;" href="{% url 'logout' %}"
       role="button">Logout</a>
   </div>
 </nav>
 {% else %}
 <nav class="navbar navbar-dark bg-dark" style="margin-top: 10px;">
-  <a class="navbar-brand" href="{% url 'home' %}">
+  <a class="navbar-brand" href="{% url 'dashboard' %}">
     <img src="{% static 'image/ps.png' %}" width="150" height="45" alt="">
   </a>
   <div class="form-inline" style="margin: 5px 5px 5px 5px 5px;">
     <h2 style=" color:rgb(255, 255, 255); margin-right: 10px;">{{ user.first_name }}</h2>
       <a class="btn btn-primary "style="text-align:center;margin-right: 10px; " href="#" role="button" id="backButton">Back</a>
-         <!-- Include the navbar.js JavaScript file -->
-   
     <a class="btn btn-danger" style="text-align:center; margin-right: 10px;" href="{% url 'logout' %}"
       role="button">Logout</a>
   </div>
@@ -70,10 +65,8 @@
 
 
   {% endblock %}
-
-  {% block javascript %}
-  {% endblock %}
-
+   <!-- Include the navbar.js JavaScript file -->
+   <script src="{% static 'javascript/navbar.js' %}"></script>
   
 
   <!-- jQuery first, then Popper.js, then Bootstrap JS -->
@@ -86,7 +79,7 @@
     integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
     crossorigin="anonymous"></script>
  
-    <script src="{% static 'javascript/navbar.js' %}"></script>
+
 
    
 </body>
