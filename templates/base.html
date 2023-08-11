@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-  
+  {% load static %}
   <!-- {{ request.path }} -->
 
   <!-- Required meta tags -->
@@ -14,8 +14,10 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
     integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
   <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+  
   <title>Assessment_Tool</title>
-  {% load static %}
+  <link rel="shortcut icon" type="image/x-icon" href="{% static 'image/fa.png' %}">
+
 </head>
 
 
@@ -30,19 +32,23 @@
     <h2 style=" color:rgb(255, 255, 255); margin-right: 10px;">Hi Admin </h2>
     <a class="btn btn-primary" style="text-align:center;margin-right: 10px;" href="{% url 'addassessment' %}"
       role="button">Add Assessment</a>
-      <a class="btn btn-primary "style="text-align:center;margin-right: 10px; " href="#" id="backButton">Back</a>
+      <a class="btn btn-primary "style="text-align:center;margin-right: 10px; " href="#" role="button" id="backButton">Back</a>
+         <!-- Include the navbar.js JavaScript file -->
+   
     <a class="btn btn-danger" style="text-align:center; margin-right: 10px;" href="{% url 'logout' %}"
       role="button">Logout</a>
   </div>
 </nav>
 {% else %}
 <nav class="navbar navbar-dark bg-dark" style="margin-top: 10px;">
-  <a class="navbar-brand" href="{% url 'dashboard' %}">
+  <a class="navbar-brand" href="{% url 'home' %}">
     <img src="{% static 'image/ps.png' %}" width="150" height="45" alt="">
   </a>
   <div class="form-inline" style="margin: 5px 5px 5px 5px 5px;">
     <h2 style=" color:rgb(255, 255, 255); margin-right: 10px;">{{ user.first_name }}</h2>
-      <a class="btn btn-primary "style="text-align:center;margin-right: 10px; " href="#" id="backButton">Back</a>
+      <a class="btn btn-primary "style="text-align:center;margin-right: 10px; " href="#" role="button" id="backButton">Back</a>
+         <!-- Include the navbar.js JavaScript file -->
+   
     <a class="btn btn-danger" style="text-align:center; margin-right: 10px;" href="{% url 'logout' %}"
       role="button">Logout</a>
   </div>
@@ -64,19 +70,11 @@
 
 
   {% endblock %}
-  <!-- Optional JavaScript -->
-  <script>
-    // Function to go back to the previous page and reload it
-    function goBackAndReload() {
-        window.history.back();
-        location.reload();
-    }
 
-    // Adding an event listener to the back button element
-    document.addEventListener("DOMContentLoaded", function() {
-        document.getElementById("backButton").addEventListener("click", goBackAndReload);
-    });
-</script>
+  {% block javascript %}
+  {% endblock %}
+
+  
 
   <!-- jQuery first, then Popper.js, then Bootstrap JS -->
   <script src="https://code.jquery.com/jquery-3.4.1.min.js"
@@ -88,10 +86,8 @@
     integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
     crossorigin="anonymous"></script>
  
+    <script src="{% static 'javascript/navbar.js' %}"></script>
 
-   
-
-   <!-- Include the html2pdf.js library -->
    
 </body>
 </html>

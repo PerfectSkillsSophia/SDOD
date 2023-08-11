@@ -2,16 +2,7 @@
 {% load static %}
 
 {% block content %}
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var backButton = document.querySelector('#back-button');
-        backButton.addEventListener('click', function(event) {
-            event.preventDefault();
-            window.history.back();
-        });
-    });
-</script>
-<br>
+<section class="vh-100" style="background-color: rgb(255, 255, 255);margin-top: 50px;">
 <div class="container">
     <div class="row">
       <div class="col-md-5">
@@ -46,5 +37,6 @@
         {% endfor %}
     </div>
 </div>
+</section>
 
 {% endblock %}
