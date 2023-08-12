@@ -247,14 +247,9 @@ from PIL import Image
 import io
 from reportlab.pdfgen import canvas
 
-
-from concurrent.futures import ThreadPoolExecutor
-from django.db.models import F
-from django.http import HttpResponseRedirect
-from django.shortcuts import render
-from django.contrib import messages
-from statistics import mean
-import requests
+import asyncio
+import aiohttp
+from .code import transcribe_audio
 
  ##########   Dashboard View   ##########
 @staff_member_required
@@ -361,12 +356,8 @@ def testresultfunc(request):
 
  ##########   Assessments Result generation View   ##########
 
-@staff_member_required
-@login_required(login_url='login')
-
-# Rest of your views, imports, and code...
-
-
+# @staff_member_required
+# @login_required(login_url='login')
 # def run_task(request):
 #     ref_url = request.META.get('HTTP_REFERER')
 #     if request.method == 'POST':
@@ -443,92 +434,60 @@ def testresultfunc(request):
 
 
 
-
-
-def read_file(filename, chunk_size=5242880):
-    with open(filename, 'rb') as _file:
-        while True:
-            data = _file.read(chunk_size)
-            if not data:
-                break
-            yield data
-
-def process_video_emotions(video_ans_obj):
-    vf = video_ans_obj.videoAns.path
-    confidence, nervousness, neutral = analyze_video_emotions(vf)
-    video_ans_obj.confidence = confidence
-    video_ans_obj.nervousness = nervousness
-    video_ans_obj.neutral = neutral
-    video_ans_obj.save()
-
-def process_transcription(video_ans_obj):
-    vf = video_ans_obj.videoAns.path
-    API_KEY = "623cfea0aba24d8f981195bbc20d48e0"
-    # Upload the video file
-    headers = {'authorization': API_KEY}
-    response = requests.post('https://api.assemblyai.com/v2/upload', headers=headers, data=read_file(vf))
-    json_str1 = response.json()
-    
-    # Request transcription
-    endpoint = "https://api.assemblyai.com/v2/transcript"
-    json = {
-        "audio_url": json_str1["upload_url"]
-    }
-    response = requests.post(endpoint, json=json, headers=headers)
-    json_str2 = response.json()
-    
-    # Check transcription status
-    endpoint = "https://api.assemblyai.com/v2/transcript/" + json_str2["id"]
-    response = requests.get(endpoint, headers=headers)
-    json_str3 = response.json()
-    while json_str3["status"] != "completed":
-        response = requests.get(endpoint, headers=headers)
-        json_str3 = response.json()
-    
-    # Update the videoAns object
-    video_ans_obj.transnscript = json_str3["text"]
-    video_ans_obj.save()
-    
-    # Calculate accuracy
-    s1 = video_ans_obj.question_id.correctanswer
-    s2 = video_ans_obj.transnscript
-    accuracy = FindAcc(s1, s2)
-    
-    # Update accuracy in videoAns object
-    video_ans_obj.answer_accurecy = accuracy
-    video_ans_obj.save()
-
+@staff_member_required
+@login_required(login_url='login')
 def run_task(request):
     ref_url = request.META.get('HTTP_REFERER')
     if request.method == 'POST':
-        acc = []
+        acc=[]
         user_name = request.POST.get('user_name')
         assessment_name = request.POST.get('assessment_name')
         identi = request.POST.get('identi')
         video_ans_ids = request.POST.get('video_ans_ids').split(',')
+        API_KEY = "623cfea0aba24d8f981195bbc20d48e0"
         data1 = videoAns.objects.filter(user_name=user_name, assessment_name=assessment_name, identi=identi)
-        
-        # Process emotion analysis concurrently
-        with ThreadPoolExecutor() as executor:
-            executor.map(process_video_emotions, data1)
-        
-        # Process transcription and accuracy concurrently
-        with ThreadPoolExecutor() as executor:
-            for video_ans_id in video_ans_ids:
-                result = videoAns.objects.get(ansId=video_ans_id)
-                executor.submit(process_transcription, result)
-                acc.append(result.answer_accurecy)
-        
+        for video_ans_id in data1:
+            vf = video_ans_id.videoAns.path
+            #confidence, nervousness = analyze_video_emotions(vf)
+            confidence, nervousness, neutral = analyze_video_emotions(vf)
+            print("confidence:", confidence, "%\nnervousness:", nervousness, "%")
+            video_ans_id.confidence = confidence
+            video_ans_id.nervousness = nervousness
+            video_ans_id.neutral = neutral
+            video_ans_id.save()
+
+        for video_ans_id in video_ans_ids:
+            print(video_ans_id)
+            result = videoAns.objects.get(ansId=video_ans_id)
+            vf = result.videoAns.path
+           # result.trasnscript = transcribe_audio(vf)
+            text = asyncio.run(transcribe_audio(API_KEY, vf))
+            result.trasnscript = text
+            result.save()
+            print(text)
+        for video_ans_id in video_ans_ids:
+            answer = videoAns.objects.filter(ansId=video_ans_id)
+            for trans in answer:
+                s1 = trans.question_id.correctanswer
+                s2 = trans.trasnscript
+            accuracy = FindAcc(s1, s2)
+            answer = videoAns.objects.get(ansId=video_ans_id)
+            answer.answer_accurecy = accuracy
+            answer.save()
+            print(s1)
+            print(s2)
+            answer = videoAns.objects.get(ansId=video_ans_id)
+            acc.append(answer.answer_accurecy)
+        print(acc)
+        print(acc)
         mean_acc = mean(acc)
+        print("mean of acc is", mean_acc)
         sub_status = submission_status.objects.get(user_name=user_name, assessment_name=assessment_name, identi=identi)
         sub_status.final_result = mean_acc
         sub_status.result_generate = True
         sub_status.save()
         messages.success(request, 'Result is generated Successfully.')
-        
-        return HttpResponseRedirect(ref_url, {'mean_acc': mean_acc})
-
-
+    return HttpResponseRedirect(ref_url, {'mean_acc': mean_acc})
 
  ##########   Result View   ##########
 
