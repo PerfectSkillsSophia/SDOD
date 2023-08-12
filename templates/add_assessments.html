@@ -2,43 +2,57 @@
 {% load static %}
 {% block content %}
 
-  <script src="{% static 'javascript/add_assessments.js' %}"></script>
+<script>function validateInput(event) {
+    const inputValue = event.target.value;
 
-  <section class="vh-100" style="background-color: rgb(255, 255, 255);margin-top: 50px;">
-<div class="container">
-  <div class="row">
-    <div class="col-md-5">
-      <h1>Add Assessment</h1>
+    // Remove spaces and replace with underscores
+    const sanitizedValue = inputValue.replace(/\s+/g, '_');
+
+    // Check for characters that are not allowed (non-alphabetic, non-underscore, non-numeric)
+    const regex = /[^A-Za-z0-9_]/g;
+    if (regex.test(sanitizedValue)) {
+      const validCharacters = sanitizedValue.replace(regex, '');
+      event.target.value = validCharacters;
+    } else {
+      event.target.value = sanitizedValue;
+    }
+  }</script>
+
+<section class="vh-100" style="background-color: rgb(255, 255, 255);margin-top: 50px;">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-5">
+        <h1>Add Assessment</h1>
+      </div>
+      <div class="col-md-4">
+      </div>
+      <div class="col-md-3">
+
+        <hr>
+      </div>
     </div>
-    <div class="col-md-4">
+    <div class="alert alert-secondary" role="alert">
+      Note : <span style="color: blue;">
+        <ol>
+
+          <li>Do not start Assessment name with Numbers and special characters. </li>
+          <li>Space in the Assessment name is not allowed. </li>
+          <li>Use "_" if want please don't use any other characters to avoid conflict. </li>
+
+        </ol>
+      </span>
     </div>
-    <div class="col-md-3">
-      
-      <hr>
-    </div>
+    <form action="{% url 'Add' %}">
+      <div class="form-group">
+        <input class="form-control" name="ass_name" type="text" oninput="validateInput(event)"
+          placeholder="Assessment Name">
+      </div>
+      <div class="form-group">
+        <textarea class="form-control" name="ass_dec" type="ass_dec" placeholder="Assessment Description"></textarea>
+      </div>
+      <button class="btn btn-primary btn-block my-2 my-sm-0" type="submit">ADD</button>
+    </form>
+    <hr>
   </div>
-  <div class="alert alert-secondary" role="alert">
-    Note : <span style="color: blue;">
-      <ol>
-
-        <li>Do not start Assessment name with Numbers and special characters. </li>
-        <li>Space in the Assessment name is not allowed. </li>
-        <li>Use "_" if want please don't use any other characters to avoid conflict. </li>
-
-      </ol>
-    </span>
-  </div>
-  <form action="{% url 'Add' %}">
-    <div class="form-group">
-      <input class="form-control" name="ass_name" type="text" oninput="validateInput(event)"
-        placeholder="Assessment Name">
-    </div>
-    <div class="form-group">
-      <textarea class="form-control" name="ass_dec" type="ass_dec" placeholder="Assessment Description"></textarea>
-    </div>
-    <button class="btn btn-primary btn-block my-2 my-sm-0" type="submit">ADD</button>
-  </form>
-  <hr>
-</div>
-  </section>
+</section>
 {% endblock %}
