@@ -1,86 +1,75 @@
-import re
 import nltk
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 nltk.data.path.append('nltk_data')
-
-# import nltk
-# import ssl
-
-# try:
-#     _create_unverified_https_context = ssl._create_unverified_context
-# except AttributeError:
-#     pass
-# else:
-#     ssl._create_default_https_context = _create_unverified_https_context
-
-# nltk.download('wordnet')
-
-""" def FindAcc(S1, S2):
-    X = S1.lower()
-    Y = S2.lower()
-
-    S1 = re.split(r'[ ,.!;"()]', X)
-    S2 = re.split(r'[ ,.!;"()]', Y)
-
-    S1.sort()
-    S2.sort()
-
-    Positive = 0
-    Negative = 0
-
-    for i in S1:
-        if i == "":
-            continue
-
-        if i in S2:
-            Positive += 1
-        else:
-            Negative += 1
-
-    Total = Positive + Negative
-
-    AccPer = (Positive * 100) / Total
-
-    X_list = word_tokenize(X)
-    Y_list = word_tokenize(Y)
-
-    sw = stopwords.words("english")
-    l1 = []
-    l2 = []
-
-    X_set = {w for w in X_list if not w in sw}
-    Y_set = {w for w in Y_list if not w in sw}
-
-    rvector = X_set.union(Y_set)
-    for w in rvector:
-        if w in X_set:
-            l1.append(1)  # create a vector
-        else:
-            l1.append(0)
-        if w in Y_set:
-            l2.append(1)
-        else:
-            l2.append(0)
-    c = 0
-
-    for i in range(len(rvector)):
-        c += l1[i] * l2[i]
-    cosine = c / float((sum(l1) * sum(l2)) ** 0.5)
-
-    cosine *= 100
-
-    if min(AccPer, (cosine)) < 40:
-        AccPer = min(AccPer, cosine)
-    else:
-        AccPer = max(AccPer, cosine)
-    return AccPer
- """
-
 import re
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
+import cv2
+from fer import FER
+import math
+import time
+import io
+from PIL import Image
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from reportlab.pdfgen import canvas
+from django.http import HttpResponse
+###############    FER    ###################
 
+
+def analyze_video_emotions(video_filename):
+    vid = cv2.VideoCapture(video_filename)
+    fps = int(vid.get(cv2.CAP_PROP_FPS) / 3)  # Process every third frame
+    emotion_detector = FER()
+    n = 0
+    i = 0
+    sad1 = fear1 = happy1 = angry1 = surprise1 = disgust1 = neutral1 = 0
+
+    while True:
+        ret, frame = vid.read()
+        if not ret:
+            break
+        if n % fps == 0:
+            attri = emotion_detector.detect_emotions(frame)
+            print(attri)
+            if len(attri) > 0:
+                sad1 += attri[0]["emotions"]['sad']
+                fear1 += attri[0]["emotions"]['fear']
+                happy1 += attri[0]["emotions"]['happy']
+                angry1 += attri[0]["emotions"]['angry']
+                surprise1 += attri[0]["emotions"]['surprise']
+                disgust1 += attri[0]["emotions"]['disgust']
+                neutral1 += attri[0]["emotions"]['neutral']
+                i += 1
+        n += 1
+    vid.release()
+
+    total = sad1 + fear1 + happy1 + angry1 + surprise1 + disgust1 + neutral1
+    
+    if total == 0:
+        confidence = 0
+        nervousness = 0
+    else:
+        confidence = ((happy1 + surprise1) / total) * 100
+        nervousness = ((sad1 + fear1 + disgust1) / total) * 100
+
+        if confidence % 1 > 0.4:
+            confidence = math.ceil(confidence)
+        else:
+            confidence = math.floor(confidence)
+
+        if nervousness % 1 > 0.4:
+            nervousness = math.ceil(nervousness)
+        else:
+            nervousness = math.floor(nervousness)
+
+        neutral1 = 100 - (confidence + nervousness)
+
+    return confidence, nervousness, neutral1
+
+
+##############################
 
 def FindAcc(S1, S2):
     X = S1.lower()
@@ -151,8 +140,6 @@ def FindAcc(S1, S2):
             AccPer = max(AccPer, cosine)
 
     return AccPer
-
-
 
 #################################
 import re
@@ -314,9 +301,42 @@ def similarity(X, Y):
         accu = 100 - accu
 
     return accu
+ 
+
+###############################
+
+def take_full_page_screenshot(url, max_retries=3):
+    for _ in range(max_retries):
+        try:
+            chrome_options = Options()
+            chrome_options.add_argument("--headless")
+            chrome_options.add_argument("--no-sandbox")
+            chrome_options.add_argument("--disable-gpu")
+            driver = webdriver.Chrome(options=chrome_options)
+
+            driver.get(url)
+            time.sleep(10)  # Wait for the page to load (adjust as needed)
+
+            total_height = driver.execute_script("return Math.max( document.body.scrollHeight, document.body.offsetHeight, document.documentElement.clientHeight, document.documentElement.scrollHeight, document.documentElement.offsetHeight );")
+            driver.set_window_size(driver.execute_script("return window.innerWidth"), total_height)
+
+            screenshot = driver.get_screenshot_as_png()
+            screenshot_image = Image.open(io.BytesIO(screenshot))
+
+            driver.quit()
+
+            return screenshot_image
+        except Exception as e:
+            print(f"Error: {e}\nRetrying...")
+            time.sleep(5)  # Wait before retrying
+
+    return f"Failed to capture the full-page screenshot for URL: {url}"
+
+def generate_pdf_from_screenshot(screenshot):
+    pdf_buffer = io.BytesIO()
+    c = canvas.Canvas(pdf_buffer, pagesize=screenshot.size)
+    c.drawInlineImage(screenshot, 0, 0, width=screenshot.width, height=screenshot.height)
+    c.save()
+    return pdf_buffer.getvalue()
 
 
-# X = "i am not batman" # fixed i.e teacher
-# Y = "i am batman" #trascript
-
-# print("similarity:", similarity(X, Y))
