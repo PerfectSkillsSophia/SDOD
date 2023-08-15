@@ -215,7 +215,7 @@ def screenshot_to_pdf(request, slug1, slug2, slug3):
     # Create the URL using the provided slugs
     html_page_url = f"https://psautoscreen.com/administration/detail/{slug1}/{slug2}/{slug3}/"
     test_html_page_url = f"http://127.0.0.1:8000/administration/detail/{slug1}/{slug2}/{slug3}/"
-    full_page_screenshot = take_full_page_screenshot(test_html_page_url)
+    full_page_screenshot = take_full_page_screenshot(html_page_url)
     if isinstance(full_page_screenshot, str):
         # Return the debug information as an HttpResponse
         return HttpResponse(full_page_screenshot)
