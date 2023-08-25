@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.2/jspdf.debug.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.3.2/html2canvas.min.js"></script>
+
+{% if messages %}
+{% for message in messages %}
+<div class="alert alert-{{ message.tags }} alert-dismissible fade show text-center" role="alert">
+
+    <strong>{{ message }}</strong>
+
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+{% endfor %}
+{% endif %}
+<section class="vh-100" id="htmlContent" style="background-color: rgb(255, 255, 255);margin-top: 50px;">
+    <div class="container h-100" style="margin-top: 5px;">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="col-md-4 col-sm-12" style="text-align: left;">
+                <h5>User Name: {{ user_name }}</h5>
+            </div>
+            <div class="col-md-4 col-sm-12" style="text-align: center;">
+                <img src="{% static 'image/ps.png' %}" width="150" height="45" alt="">
+            </div>
+            <div class="col-md-4 col-sm-12" style="text-align: right;">
+                <h5>Assessment Name: {{ assessment_name }}</h5>
+            </div>
+        </div>
+        <hr>
+        <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="col-md-4">
+                {% for i in sub_status %}
+                {% if i.result_generate %}
+                <p> <span style="font-weight: bold;">Over All accurecy of student is : </span> {{ i.final_result }}%</p>
+                {% else %}
+                <p> <span style="font-weight: bold;">Over All accurecy of student is : </span> "Result is not generated
+                    yet."</p>
+                {% endif %}
+                {% endfor %}
+            </div>
+            <div class="col-md-4"></div>
+            <div class="col-md-4" style="text-align: right;">
+                <a href="#" id="downloadPdf" class="pdf-link">Download PDF</a>
+            </div>
+            <script>
+                const downloadPdfLink = document.getElementById('downloadPdf');
+
+                downloadPdfLink.addEventListener('click', function (event) {
+                    event.preventDefault(); // Prevent the default link behavior
+
+                    const pdf = new jsPDF('p', 'pt', 'letter');
+
+                    const element = document.getElementById('htmlContent');
+
+                    const videoDivs = element.querySelectorAll('.col-md-4.video');
+                    const resultDivs = element.querySelectorAll('.col-md-8.result');
+
+                    // Hide the download link
+                    downloadPdfLink.style.display = 'none';
+
+                    // Hide video and result divs for each iteration
+                    videoDivs.forEach(videoDiv => {
+                        videoDiv.style.display = 'none';
+                    });
+
+                    resultDivs.forEach(resultDiv => {
+                        resultDiv.classList.remove('col-md-7');
+                        resultDiv.classList.add('col-md-12');
+                    });
+
+                    html2canvas(element).then(canvas => {
+                        // Restore the download link and video/result divs for each iteration
+                        downloadPdfLink.style.display = ''; // Restore the link visibility
+
+                        videoDivs.forEach(videoDiv => {
+                            videoDiv.style.display = '';
+                        });
+
+                        resultDivs.forEach(resultDiv => {
+                            resultDiv.classList.remove('col-md-12');
+                            resultDiv.classList.add('col-md-7');
+                        });
+
+                        const imgData = canvas.toDataURL('image/jpeg', 1.0);
+                        pdf.addImage(imgData, 'JPEG', 0, 0, 612, 792); // Use appropriate dimensions for 'letter' size
+
+                        pdf.save('Result.pdf');
+                    });
+                });
+            </script>
+        </div>
+        <hr>
+        {% for i in sub_status %}
+        {% if i.result_generate %}
+        {% for item in data %}
+        <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="col-md-4 video">
+                <video width="100%" height="60%" controls>
+                    <source src="{{ url }}{{ item.videoAns }}" type="video/webm">
+                </video>
+            </div>
+            <div class="col-md-4 result">
+                <p> <span style="font-weight: bold;"> Question {{ forloop.counter }} : </span></Question>
+                    {{ item.question_id.quostion }}</p>
+                <p> <span style="font-weight: bold;">Stored Answer : </span>{{ item.question_id.correctanswer }}
+                </p>
+                <p> <span style="font-weight: bold;">Recorded Answer :</span>
+                    {{ item.trasnscript }}
+                </p>
+            </div>
+            <div class="col-md-4" style="text-align: right;">
+                <p>Accuracy of Answer is: <span style="font-weight:bold;">{{ item.answer_accurecy }} % </span></p>
+                <p>Confidence : <span style="font-weight:bold;"> {{ item.confidence }} %</span></p>
+                <p>Nervousness : <span style="font-weight:bold;">{{ item.nervousness }} % </span></p>
+                <p>Neutral_Emotions : <span style="font-weight:bold;">{{ item.neutral }} %</span></p>
+            </div>
+        </div>
+        <hr>
+        {% endfor %}
+        {% else %}
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6" style="vertical-align: middle;">Result is not yet generated.</div>
+                    <div class="col-md-6" style="text-align: right;">
+                        <form method="POST" id="formresult" action="{% url 'run_task' %}">
+                            {% csrf_token %}
+                            {% for i in sub_status %}
+                            <input type="hidden" name="user_name" value="{{ i.user_name }}">
+                            <input type="hidden" name="assessment_name" value="{{ i.assessment_name }}">
+                            <input type="hidden" name="identi" value="{{ i.identi }}">
+                            {% endfor %}
+                            <input type="hidden" name="video_ans_ids"
+                                value="{% for item in data %}{{ item.ansId }}{% if not forloop.last %},{% endif %}{% endfor %}">
+                            <button class="btn btn-primary btn-lg" id="run-task-button" type="submit">Generate
+                                result now !</button>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+</section>
+
+
+
+
+
+{% endblock %}
