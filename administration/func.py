@@ -8,13 +8,7 @@ from nltk.tokenize import word_tokenize
 import cv2
 from fer import FER
 import math
-import time
-import io
-from PIL import Image
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from reportlab.pdfgen import canvas
-from django.http import HttpResponse
+
 ###############    FER    ###################
 
 
@@ -304,39 +298,4 @@ def similarity(X, Y):
  
 
 ###############################
-
-def take_full_page_screenshot(url, max_retries=3):
-    for _ in range(max_retries):
-        try:
-            chrome_options = Options()
-            chrome_options.add_argument("--headless")
-            chrome_options.add_argument("--no-sandbox")
-            chrome_options.add_argument("--disable-gpu")
-            driver = webdriver.Chrome(options=chrome_options)
-
-            driver.get(url)
-            time.sleep(10)  # Wait for the page to load (adjust as needed)
-
-            total_height = driver.execute_script("return Math.max( document.body.scrollHeight, document.body.offsetHeight, document.documentElement.clientHeight, document.documentElement.scrollHeight, document.documentElement.offsetHeight );")
-            driver.set_window_size(driver.execute_script("return window.innerWidth"), total_height)
-
-            screenshot = driver.get_screenshot_as_png()
-            screenshot_image = Image.open(io.BytesIO(screenshot))
-
-            driver.quit()
-
-            return screenshot_image
-        except Exception as e:
-            print(f"Error: {e}\nRetrying...")
-            time.sleep(5)  # Wait before retrying
-
-    return f"Failed to capture the full-page screenshot for URL: {url}"
-
-def generate_pdf_from_screenshot(screenshot):
-    pdf_buffer = io.BytesIO()
-    c = canvas.Canvas(pdf_buffer, pagesize=screenshot.size)
-    c.drawInlineImage(screenshot, 0, 0, width=screenshot.width, height=screenshot.height)
-    c.save()
-    return pdf_buffer.getvalue()
-
 
