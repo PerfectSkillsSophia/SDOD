@@ -2,7 +2,7 @@ from django.db import models
 from django.db import models
 from django.contrib.auth.models import User
 from administration.models import Question
-# Create your models here.
+# Create your models here
 
 class videoAns(models.Model):
     ansId = models.AutoField(primary_key=True)
@@ -33,5 +33,6 @@ class submission_status(models.Model):
         final_result = models.IntegerField(null=True,default=0)
         submissionstatus = models.BooleanField(default=False)
         result_generate = models.BooleanField(default=False)
+        result_process = models.BooleanField(default=False)
         def __str__(self):
             return f" User name :{self.user_name} - Assessment_Name :  {self.assessment_name} - submission status : {self.submissionstatus}- final_result : {self.final_result}"

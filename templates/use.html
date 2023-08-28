@@ -6,6 +6,62 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.3.2/html2canvas.min.js"></script>
 
+<style>
+    .loader-container {
+
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+    }
+
+    .loader-demo-box {
+        border-radius: 0.25rem !important;
+        width: 100%;
+        height: 100px;
+    }
+
+    .jumping-dots-loader {
+        width: 100px;
+        height: 100px;
+        border-radius: 100%;
+        position: relative;
+        margin: 0 auto;
+    }
+
+    .jumping-dots-loader span {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border-radius: 100%;
+        background-color: rgb(0, 136, 255);
+        margin: 35px 5px;
+    }
+
+    .jumping-dots-loader span:nth-child(1) {
+        animation: bounce 1s ease-in-out infinite;
+    }
+
+    .jumping-dots-loader span:nth-child(2) {
+        animation: bounce 1s ease-in-out 0.33s infinite;
+    }
+
+    .jumping-dots-loader span:nth-child(3) {
+        animation: bounce 1s ease-in-out 0.66s infinite;
+    }
+
+    @keyframes bounce {
+
+        0%,
+        75%,
+        100% {
+            transform: translateY(0);
+        }
+
+        25% {
+            transform: translateY(-20px);
+        }
+    }
+</style>
 {% if messages %}
 {% for message in messages %}
 <div class="alert alert-{{ message.tags }} alert-dismissible fade show text-center" role="alert">
@@ -122,12 +178,45 @@
         </div>
         <hr>
         {% endfor %}
+
+
+        {% elif i.result_process %}
+        <div class="col-md-6"
+        style="vertical-align: middle; align-content: center;">Result genaration is in
+        processing it might take some time dont close the browesr sit back and relax.</div>
+
+        <div class="loader-container">
+            <div class="loader-demo-box">
+                <div class="jumping-dots-loader">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                <div class="moving-gradient"></div>
+            </div>
+        </div>
+
         {% else %}
+        <div class="loader-container" style="display: none;">
+            <div class="loader-demo-box">
+                <div class="jumping-dots-loader">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                <div class="moving-gradient"></div>
+            </div>
+        </div>
         <div class="card">
             <div class="card-body">
                 <div class="row">
-                    <div class="col-md-6" style="vertical-align: middle;">Result is not yet generated.</div>
+                    <div class="col-md-6" id="generate" style="vertical-align: middle;">Result is not yet generated.
+                    </div>
+                    <div class="col-md-6" id="generate_messege"
+                        style="vertical-align: middle; align-content: center; display: none;">Result genaration is in
+                        processing it might take some time dont close the browesr sit back and relax.</div>
                     <div class="col-md-6" style="text-align: right;">
+
                         <form method="POST" id="formresult" action="{% url 'run_task' %}">
                             {% csrf_token %}
                             {% for i in sub_status %}
@@ -140,6 +229,28 @@
                             <button class="btn btn-primary btn-lg" id="run-task-button" type="submit">Generate
                                 result now !</button>
                         </form>
+                        <script>
+                            document.getElementById("run-task-button").addEventListener("click", function (event) {
+                                event.preventDefault(); // Prevent form submission (to control the loader display)
+
+                                var loader = document.querySelector(".loader-container");
+                                var generateText = document.getElementById("generate");
+                                var formResult = document.getElementById("formresult");
+                                var generate_messege = document.getElementById("generate_messege");
+
+                                loader.style.display = "block"; // Show the loader
+                                generateText.style.display = "none"; // Update the text content
+                                generate_messege.style.display = "block";
+
+
+                                // Submit the form after a short delay to allow the loader to be displayed
+                                setTimeout(function () {
+                                    formResult.submit();
+                                }, 100);
+
+                                formResult.style.display = "none"; // Hide the formresult element
+                            });
+                        </script>
                     </div>
                 </div>
 

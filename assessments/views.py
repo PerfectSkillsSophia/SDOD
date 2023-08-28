@@ -10,7 +10,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 import random
 import string
-from administration.tasks import  videoids
+
 
 
 # Define a view function to render a template after user login
@@ -55,7 +55,6 @@ def fileUpload(request):
 
         for i in range(len(request.FILES)):
             video = request.FILES['video_%d' % i]
-            video_ans_ids =[]
             videos.append(video)
         questions = json.loads(request.POST.get('questions'))
         # Create a video answer object for each uploaded video
@@ -65,11 +64,7 @@ def fileUpload(request):
             video = videos[i]
             question_instance = Question.objects.get(questionId=int(qid))
             videoAns.objects.create(videoAns=video, user_name=username,question_id=question_instance ,assessment_name=assessment_name,identi=identi)
-        data1 = videoAns.objects.filter(assessment_name=assessment_name, identi=identi)
-        for i in data1:
-             video_ans_ids.append(i.ansId)
-        
-        videoids.delay(video_ans_ids)
+
 
         # Send a JSON response indicating success
         response_data = {'status': 'success'}
