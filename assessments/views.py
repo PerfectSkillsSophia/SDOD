@@ -50,9 +50,8 @@ def fileUpload(request):
         username = request.user
         assessment_name = request.POST.get('ass_name')
         identi= ''.join(random.choices(string.ascii_letters + string.digits, k=5))
+        submission_status_instance = submission_status.objects.create(user_name=username, assessment_name=assessment_name, identi=identi, submissionstatus=True)
         videos = []
-        submission_status.objects.create(user_name=username,assessment_name=assessment_name,identi=identi,submissionstatus=True)
-
         for i in range(len(request.FILES)):
             video = request.FILES['video_%d' % i]
             videos.append(video)
@@ -63,10 +62,7 @@ def fileUpload(request):
             qid = question.split()[-1]
             video = videos[i]
             question_instance = Question.objects.get(questionId=int(qid))
-            videoAns.objects.create(videoAns=video, user_name=username,question_id=question_instance ,assessment_name=assessment_name,identi=identi)
-
-
-        # Send a JSON response indicating success
+            videoAns.objects.create(videoAns=video, user_name=username,question_id=question_instance ,assessment_name=assessment_name,identi=identi,submission_status=submission_status_instance)
         response_data = {'status': 'success'}
         return JsonResponse(response_data)
     else:

@@ -200,6 +200,7 @@ recordButton.addEventListener('click', () => {
     startRecording();
     recordButton.disabled = true;
     nextBtn.disabled = false;
+    startButton.disabled = true;
   } else {
     alert("Your answer is recorded. Review your answer and then submit it!");
     recordButton.textContent = 'Record';

@@ -8,10 +8,11 @@ from django.contrib import messages
 from administration.models import *
 from django.urls import reverse
 from sophia import settings
-from statistics import mean
 import random
 import string
 from .func import *
+from .transcript import upload_and_transcribe_audio
+from statistics import mean
 
 
  ##########   Dashboard View   ##########
@@ -20,9 +21,7 @@ from .func import *
 def dashboard(request):
     # Retrieves all assessment objects
     assessment = allAssessment.objects
-    # Retrieves the first 5 videoAns objects
-    video = videoAns.objects.all()[:5]
-    return render(request, 'dashboard.html', {'assessment': assessment, 'video': video})
+    return render(request, 'dashboard.html', {'assessment': assessment})
 
  ##########   All Submission View   ##########
 @staff_member_required
@@ -64,7 +63,7 @@ def view_assessments(request, ass_id):
     # Retrieves allAssessment objects for the given ass_id
     assessment = allAssessment.objects.filter(assId=ass_id)
     # Retrieves the first 5 question objects for the given ass_id
-    allque = allAssessment.objects.get(assId=ass_id).question_set.all()[:5]
+    allque = allAssessment.objects.get(assId=ass_id).question_set.all()[:10]
     return render(request, 'assview.html', {'ques': allque, 'ass': assessment})
 
  ##########   Add Question View   ##########
@@ -107,17 +106,12 @@ def testresultfunc(request):
     context = {'accuracy1': accuracy1, 'accuracy2': accuracy2, 'accuracy3': round(accuracy3, 2), 's1': s1, 's2': s2}
     return render(request, 'testresult.html', context)
 
- ##########   Assessments Result generation View   ##########
-
 
  ##########   Submistion details view  ##########
-def detail_view(request, user_name, assessment_name, identi):
+def detail_view(request, identi):
     url = settings.MEDIA_URL
-    # Retrieves submission_status objects for the given user name, assessment name, and identi
-    sub_status = submission_status.objects.filter(user_name=user_name, assessment_name=assessment_name, identi=identi)
-    # Retrieves videoAns objects for the given user name, assessment name, and identi
-    data = videoAns.objects.filter(user_name=user_name, assessment_name=assessment_name, identi=identi)
-    return render(request, 'use.html', {'data': data, 'sub_status': sub_status, 'url': url, 'user_name': user_name,'assessment_name': assessment_name,'identi': identi})
+    sub_status = submission_status.objects.filter(identi=identi)
+    return render(request, 'use.html', { 'sub_status': sub_status, 'url': url})
 
 
 
@@ -126,80 +120,42 @@ def detail_view(request, user_name, assessment_name, identi):
 @login_required(login_url='login')
 def run_task(request):
     ref_url = request.META.get('HTTP_REFERER')
-
+    acc = []
     if request.method == 'POST':
-
-        acc = []
-        user_name = request.POST.get('user_name')
-        assessment_name = request.POST.get('assessment_name')
         identi = request.POST.get('identi')
-        video_ans_ids = request.POST.get('video_ans_ids').split(',')
-        data = videoAns.objects.filter(user_name=user_name, assessment_name=assessment_name, identi=identi)
-        data1 = videoAns.objects.filter(user_name=user_name, assessment_name=assessment_name, identi=identi)
-        sub_status = submission_status.objects.get(user_name=user_name, assessment_name=assessment_name, identi=identi)
-        sub_status.result_process=True
-        sub_status.save()
-
-        for video_ans_id in data1:
-            vf = video_ans_id.videoAns.path
-            #confidence, nervousness = analyze_video_emotions(vf)
+        sub_status_instance = submission_status.objects.get(identi=identi)
+        video_ans_instances = sub_status_instance.video_answers.all()  # Get all associated videoAns instances
+        ans_id_video_dict = {video_ans.ansId: video_ans.videoAns.path for video_ans in video_ans_instances}
+        sub_status_instance.result_process=True
+        sub_status_instance.save()
+        for id, video_file in ans_id_video_dict.items():
+            result = sub_status_instance.video_answers.get(ansId = id)
+            vf = video_file
             confidence, nervousness, neutral = analyze_video_emotions(vf)
-            print("confidence:", confidence, "%\nnervousness:", nervousness, "%")
-            video_ans_id.confidence = confidence
-            video_ans_id.nervousness = nervousness
-            video_ans_id.neutral = neutral
-            video_ans_id.save()
-
-        for video_ans_id in video_ans_ids:
-            print(video_ans_id)
-            result = videoAns.objects.get(ansId=video_ans_id)
-            vf = result.videoAns.path
-            import requests
-            API_KEY = "623cfea0aba24d8f981195bbc20d48e0"
-            filename = vf
-            # Upload Module Begins
-            def read_file(filename, chunk_size=5242880):
-                with open(filename, 'rb') as _file:
-                    while True:
-                        data = _file.read(chunk_size)
-                        if not data:
-                            break
-                        yield data
-            headers = {'authorization': API_KEY}
-            response = requests.post('https://api.assemblyai.com/v2/upload', headers=headers, data=read_file(filename))
-            json_str1 = response.json()
-            
-            endpoint = "https://api.assemblyai.com/v2/transcript"
-            json = {
-                "audio_url": json_str1["upload_url"]
-            }
-            response = requests.post(endpoint, json=json, headers=headers)
-            json_str2 = response.json()
-            endpoint = "https://api.assemblyai.com/v2/transcript/" + json_str2["id"]
-            response = requests.get(endpoint, headers=headers)
-            json_str3 = response.json()
-            while json_str3["status"] != "completed":
-                response = requests.get(endpoint, headers=headers)
-                json_str3 = response.json()
-            result.trasnscript = json_str3["text"]
+            result.confidence=confidence
+            result.nervousness=nervousness
+            result.neutral=neutral
             result.save()
-            answer = videoAns.objects.filter(ansId=video_ans_id)
-            for trans in answer:
-                s1 = trans.question_id.correctanswer
-                s2 = trans.trasnscript
-            accuracy = FindAcc(s1, s2)
-            answer = videoAns.objects.get(ansId=video_ans_id)
-            answer.answer_accurecy = accuracy
-            answer.save()
-            print(s1)
-            print(s2)
-            answer = videoAns.objects.get(ansId=video_ans_id)
-            acc.append(answer.answer_accurecy)
-        print(acc)
-        mean_acc = mean(acc)
-        print("mean of acc is", mean_acc)
-        sub_status.final_result = mean_acc
-        sub_status.result_generate = True
-        sub_status.save()
+        for id, video_file in ans_id_video_dict.items():
+            result = sub_status_instance.video_answers.get(ansId = id)
+            vf = video_file
+            transcript = upload_and_transcribe_audio(vf)
+            result.trasnscript = transcript
+            result.save()
+            s1 = result.question_id.correctanswer
+            s2 = result.trasnscript
+            print("s1" ,s1,"s2",s2)
+            text_percetage = FindAcc(s1, s2)
+            result.answer_accurecy = text_percetage
+            result.save()
+            acc.append(text_percetage)
+
+        sub_status_instance.final_result = mean(acc)
+        sub_status_instance.result_generate = True
+        sub_status_instance.save()
         messages.success(request, 'Result is generated Successfully.')
     return HttpResponseRedirect(ref_url)
+
+
+
+            
