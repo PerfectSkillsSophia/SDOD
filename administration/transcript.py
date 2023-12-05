@@ -4,6 +4,7 @@ API_KEY = "623cfea0aba24d8f981195bbc20d48e0"
 
 def upload_and_transcribe_audio(video_file_path):
     filename = video_file_path
+    transcript = ""
     try:
         def read_file(filename, chunk_size=5242880):
             with open(filename, 'rb') as _file:

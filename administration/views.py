@@ -15,6 +15,7 @@ from .transcript import upload_and_transcribe_audio
 from statistics import mean
 
 
+
  ##########   Dashboard View   ##########
 @staff_member_required
 @login_required(login_url='login')
@@ -44,6 +45,7 @@ def Add_assessment(request):
     if request.method == 'GET':
         ass_name = request.GET.get('ass_name')
         ass_dec = request.GET.get('ass_dec')
+        identi_type = request.GET.get('ass_type')
         random_number = random.choice(string.digits)
         random_character = random.choice(string.ascii_letters)
         identi_assessment = ass_name + "_" + random_number + random_character
@@ -51,6 +53,7 @@ def Add_assessment(request):
         new_ass.assessmentName = ass_name
         new_ass.assessmentDes = ass_dec
         new_ass.identi_assessment = identi_assessment
+        new_ass.assessmentType = identi_type
         new_ass.save()
         return redirect('addassessment')
     return redirect('addassessment')
@@ -111,16 +114,19 @@ def testresultfunc(request):
 def detail_view(request, identi):
     url = settings.MEDIA_URL
     sub_status = submission_status.objects.filter(identi=identi)
-    return render(request, 'use.html', { 'sub_status': sub_status, 'url': url})
+    sub_status_ass= sub_status.first()
+    assessment_name= sub_status_ass.assessment_name.strip()
+    result_set = allAssessment.objects.get(assessmentName=assessment_name)    
+    type  = result_set.assessmentType
+    return render(request, 'new_result_view.html', { 'sub_status': sub_status, 'url': url, 'type' : type})
 
-
-
- ##########   Result View   ##########
+  ##########   discr_result View   ##########
 @staff_member_required
 @login_required(login_url='login')
-def run_task(request):
+def discr_result(request):
     ref_url = request.META.get('HTTP_REFERER')
-    acc = []
+    
+    acc=[]
     if request.method == 'POST':
         identi = request.POST.get('identi')
         sub_status_instance = submission_status.objects.get(identi=identi)
@@ -152,10 +158,14 @@ def run_task(request):
 
         sub_status_instance.final_result = mean(acc)
         sub_status_instance.result_generate = True
+        sub_status_instance.result_process=False
         sub_status_instance.save()
         messages.success(request, 'Result is generated Successfully.')
     return HttpResponseRedirect(ref_url)
 
-
-
             
+
+
+""" @staff_member_required
+@login_required(login_url='login')
+def subjective_result(request): """

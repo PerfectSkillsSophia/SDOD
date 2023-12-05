@@ -156,108 +156,254 @@
         <hr>
         {% for i in sub_status %}
         {% if i.result_generate %}
+        {% if i.result_generate %}
+        <div class="container h-100" style="margin-top: 5px;">
+            <div class="row">
+                <div class="col-md-5">
+                    <h2 style=" color:rgb(0, 0, 0); margin-right: 10px;">Final Result </h2>
+                </div>
+                <div class="col-md-4">
+                </div>
+                <div class="col-md-3">
+                </div>
+            </div>
+            <hr color="black">
+        </div>
+        {% for i in sub_status %}
+        <div class="container h-100" style="margin-top: 5px;">
+            <div class="row">
+                <div class="col-md-5">
+                    <h5 style=" color:#ff5656; margin-right: 10px;">User Name: {{ i.user_name }}</h5>
+                    <h6 style=" color:#0096ff; margin-right: 10px;">Assessment Name: {{ i.assessment_name }}</h6>
+                </div>
+                <div class="col-md-4">
+                </div>
+                <div class="col-md-3">
+                    <h5 style=" color:#ff5656;"><span style="font-weight: bold; color:#0096ff;">Over All accurecy of
+                            student
+                            is : </span> {{ i.final_result }}%</h5>
+                </div>
+            </div>
+            <hr color="black">
+        </div>
+        {% endfor %}
+        {% for i in sub_status %}
         {% for video_ans_instance in i.video_answers.all %}
-        <div class="row d-flex justify-content-center align-items-center h-100">
-            <div class="col-md-4 video">
-                <video width="100%" height="60%" controls>
-                    <source src="{{ url }}{{ video_ans_instance.videoAns }}" type="video/webm">
-                </video>
-            </div>
-            <div class="col-md-4 result">
-                <p> <span style="font-weight: bold;"> Question {{ forloop.counter }} : </span></Question>
-                    {{ video_ans_instance.question_id.quostion }}</p>
-                <p> <span style="font-weight: bold;">Stored Answer : </span>{{ video_ans_instance.question_id.correctanswer }}
-                </p>
-                <p> <span style="font-weight: bold;">Recorded Answer :</span>
-                    {{ video_ans_instance.trasnscript }}
-                </p>
-            </div>
-            <div class="col-md-4" style="text-align: right;">
-                <p>Accuracy of Answer is: <span style="font-weight:bold;">{{ video_ans_instance.answer_accurecy }} %
-                    </span></p>
-                <p>Confidence : <span style="font-weight:bold;"> {{ video_ans_instance.confidence }} %</span></p>
-                <p>Nervousness : <span style="font-weight:bold;">{{ video_ans_instance.nervousness }} % </span></p>
-                <p>Neutral_Emotions : <span style="font-weight:bold;">{{ video_ans_instance.neutral }} %</span></p>
-            </div>
-        </div>
-        <hr>
-        {% endfor %}
+        <div class="container h-100" style="margin-top: 5px;">
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Question {{ forloop.counter }} : </span></Question>
+                                {{ video_ans_instance.question_id.quostion }}</h5>
 
-
-        {% elif i.result_process %}
-        <div class="col-md-6" style="vertical-align: middle; align-content: center;">Result genaration is in
-            processing it might take some time dont close the browesr sit back and relax.</div>
-
-        <div class="loader-container">
-            <div class="loader-demo-box">
-                <div class="jumping-dots-loader">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </div>
-                <div class="moving-gradient"></div>
-            </div>
-        </div>
-
-        {% else %}
-        <div class="loader-container" style="display: none;">
-            <div class="loader-demo-box">
-                <div class="jumping-dots-loader">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </div>
-                <div class="moving-gradient"></div>
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6" id="generate" style="vertical-align: middle;">Result is not yet generated.
+                        </div>
                     </div>
-                    <div class="col-md-6" id="generate_messege"
-                        style="vertical-align: middle; align-content: center; display: none;">Result genaration is in
-                        processing it might take some time dont close the browesr sit back and relax.</div>
-                    <div class="col-md-6" style="text-align: right;">
-
-                        <form method="POST" id="formresult" action="{% url 'run_task' %}">
-                            {% csrf_token %}
-                            {% for i in sub_status %}
-                            <input type="hidden" name="identi" value="{{ i.identi }}">
-                            {% endfor %}
-                            <button class="btn btn-primary btn-lg" id="run-task-button" type="submit">Generate
-                                result now !</button>
-                        </form>
-                        <script>
-                            document.getElementById("run-task-button").addEventListener("click", function (event) {
-                                event.preventDefault(); // Prevent form submission (to control the loader display)
-
-                                var loader = document.querySelector(".loader-container");
-                                var generateText = document.getElementById("generate");
-                                var formResult = document.getElementById("formresult");
-                                var generate_messege = document.getElementById("generate_messege");
-
-                                loader.style.display = "block"; // Show the loader
-                                generateText.style.display = "none"; // Update the text content
-                                generate_messege.style.display = "block";
+                    <br>
 
 
-                                // Submit the form after a short delay to allow the loader to be displayed
-                                setTimeout(function () {
-                                    formResult.submit();
-                                }, 100);
+                    <div class="card">
+                        <div class="card-body">
 
-                                formResult.style.display = "none"; // Hide the formresult element
-                            });
-                        </script>
+                            <p> <span style="font-weight: bold;">Stored Answer : </span>
+                                {{ video_ans_instance.question_id.correctanswer }}
+                            </p>
+
+                            </p>
+                        </div>
                     </div>
                 </div>
+                <div class="col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <video width="100%" height="60%" controls>
+                                <source src="{{ url }}{{ video_ans_instance.videoAns }}" type="video/webm">
+                            </video>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <hr color="black">
+        </div>
 
+
+
+        {% endfor %}
+        {% endfor %}
+
+    </div>
+
+    {% else %}
+
+
+    <div class="container h-100" style="margin-top: 5px;">
+        <div class="row">
+            <div class="col-md-5">
+                <h2 style=" color:rgb(0, 0, 0); margin-right: 10px;">Final Result </h2>
+            </div>
+            <div class="col-md-4">
+            </div>
+            <div class="col-md-3">
+            </div>
+        </div>
+        <hr color="black">
+    </div>
+    {% for i in sub_status %}
+    <div class="container h-100" style="margin-top: 5px;">
+        <div class="row">
+            <div class="col-md-5">
+                <h5 style=" color:#ff5656; margin-right: 10px;">User Name: {{ i.user_name }}</h5>
+                <h6 style=" color:#0096ff; margin-right: 10px;">Assessment Name: {{ i.assessment_name }}</h6>
+            </div>
+            <div class="col-md-4">
+            </div>
+            <div class="col-md-3">
+                <h5 style=" color:#ff5656;"><span style="font-weight: bold; color:#0096ff;">Over All accurecy of student
+                        is : </span> {{ i.final_result }}%</h5>
+            </div>
+        </div>
+        <hr color="black">
+    </div>
+    {% endfor %}
+    {% for i in sub_status %}
+    {% for video_ans_instance in i.video_answers.all %}
+    <div class="container h-100" style="margin-top: 5px;">
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Question {{ forloop.counter }} : </span></Question>
+                            {{ video_ans_instance.question_id.quostion }}</h5>
+
+                    </div>
+                </div>
+                <br>
+                <div class="card">
+
+                    <div class="card-body">
+
+                        <p> <span style="font-weight: bold;">Recorded Answer :</span>
+                            {{ video_ans_instance.trasnscript }}
+                        </p>
+                    </div>
+                </div>
+                <br>
+                <div class="card">
+                    <div class="card-body">
+
+                        <p> <span style="font-weight: bold;">Stored Answer : </span>
+                            {{ video_ans_instance.question_id.correctanswer }}
+                        </p>
+
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="card">
+                    <div class="card-body">
+
+                        <p style=" color:#ff5656;">Accuracy of Answer is: <span
+                                style="font-weight:bold; color:#000000;">{{ video_ans_instance.answer_accurecy }} %
+                            </span></p>
+                        <p style=" color:#ff5656;">Confidence : <span style="font-weight:bold; color:#000000;"> {{
+                                video_ans_instance.confidence }} %</span>
+                            Nervousness : <span style="font-weight:bold; color:#000000;">{{
+                                video_ans_instance.nervousness }} %</span>
+                            Neutral_Emotions : <span style="font-weight:bold; color:#000000;">{{
+                                video_ans_instance.neutral }} %</span>
+                        </p>
+                        <video width="100%" height="60%" controls>
+                            <source src="{{ url }}{{ video_ans_instance.videoAns }}" type="video/webm">
+                        </video>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <hr color="black">
+    </div>
+
+
+    </div>
+    {% endfor %}
+    {% endfor %}
+    {% endif %}
+
+
+    {% elif i.result_process %}
+    <div class="col-md-6" style="vertical-align: middle; align-content: center;">Result genaration is in
+        processing it might take some time dont close the browesr sit back and relax.</div>
+
+    <div class="loader-container">
+        <div class="loader-demo-box">
+            <div class="jumping-dots-loader">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <div class="moving-gradient"></div>
+        </div>
+    </div>
+
+    {% else %}
+    <div class="loader-container" style="display: none;">
+        <div class="loader-demo-box">
+            <div class="jumping-dots-loader">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <div class="moving-gradient"></div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6" id="generate" style="vertical-align: middle;">Result is not yet generated.
+                </div>
+                <div class="col-md-6" id="generate_messege"
+                    style="vertical-align: middle; align-content: center; display: none;">Result genaration is in
+                    processing it might take some time dont close the browesr sit back and relax.</div>
+                <div class="col-md-6" style="text-align: right;">
+
+                    <form method="POST" id="formresult" action="{% url 'discr_result' %}">
+                        {% csrf_token %}
+                        {% for i in sub_status %}
+                        <input type="hidden" name="identi" value="{{ i.identi }}">
+                        {% endfor %}
+                        <button class="btn btn-primary btn-lg" id="run-task-button" type="submit">Generate
+                            result now !</button>
+                    </form>
+                    <script>
+                        document.getElementById("run-task-button").addEventListener("click", function (event) {
+                            event.preventDefault(); // Prevent form submission (to control the loader display)
+
+                            var loader = document.querySelector(".loader-container");
+                            var generateText = document.getElementById("generate");
+                            var formResult = document.getElementById("formresult");
+                            var generate_messege = document.getElementById("generate_messege");
+
+                            loader.style.display = "block"; // Show the loader
+                            generateText.style.display = "none"; // Update the text content
+                            generate_messege.style.display = "block";
+
+
+                            // Submit the form after a short delay to allow the loader to be displayed
+                            setTimeout(function () {
+                                formResult.submit();
+                            }, 100);
+
+                            formResult.style.display = "none"; // Hide the formresult element
+                        });
+                    </script>
+                </div>
             </div>
 
         </div>
-        {% endif %}
-        {% endfor %}
+
+    </div>
+    {% endif %}
+    {% endfor %}
     </div>
 </section>
 

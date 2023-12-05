@@ -1,0 +1,345 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+
+
+<!-- messages -->
+{% if messages %}
+{% for message in messages %}
+<div class="alert alert-{{ message.tags }} alert-dismissible fade show text-center" role="alert">
+
+    <strong>{{ message }}</strong>
+
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+{% endfor %}
+{% endif %}
+
+<style>
+.lds-hourglass {
+  display: none;
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+.lds-hourglass:after {
+  content: " ";
+  display: block;
+  border-radius: 50%;
+  width: 0;
+  height: 0;
+  margin: 8px;
+  box-sizing: border-box;
+  border: 32px solid #ff5656;
+  border-color: #0096ff transparent #ff5656 transparent;
+  animation: lds-hourglass 1.2s infinite;
+}
+@keyframes lds-hourglass {
+  0% {
+    transform: rotate(0);
+    animation-timing-function: cubic-bezier(0.55, 0.055, 0.675, 0.19);
+  }
+  50% {
+    transform: rotate(900deg);
+    animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+  }
+  100% {
+    transform: rotate(1800deg);
+  }
+}
+</style>
+
+
+<!-- if not result is generated -->
+{% for i in sub_status %}
+{% if not i.result_generate %}
+
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Attach a submit event handler to the form
+            $('#formresult').submit(function () {
+                // Hide resultgeneration div
+                $('#resultgeneration').hide();
+
+                // Show lds-hourglass div
+                $('.lds-hourglass').show();
+            });
+        });
+    </script>
+<section class="vh-100" id="htmlContent" style="background-color: rgb(255, 255, 255);margin-top: 50px;">
+    {% for i in sub_status %}
+    <div class="container h-100" style="margin-top: 5px;">
+        <div class="row">
+            <div class="col-md-5">
+                <h5 style=" color:#ff5656; margin-right: 10px;">User Name: {{ i.user_name }}</h5>
+                <h6 style=" color:#0096ff; margin-right: 10px;">Assessment Name: {{ i.assessment_name }}</h6>
+            </div>
+            <div class="col-md-4">
+            </div>
+            <div class="col-md-3" id="resultgeneration">
+                <h5 style=" color:#ff5656;">Result is not yet generated.</h5>
+
+                        <form method="POST" id="formresult" action="{% url 'discr_result' %}">
+                            {% csrf_token %}
+                            {% for i in sub_status %}
+                            <input type="hidden" name="identi" value="{{ i.identi }}">
+                            {% endfor %}
+                            <button class="btn btn-primary btn-lg" id="run-task-button" type="submit">Generate
+                                result now !</button>
+                        </form>
+            </div>
+            <div class="lds-hourglass"></div>
+
+            
+        </div>
+        <hr color="black">
+    </div>
+    {% endfor %}
+</section>
+
+{% endif %}
+{% endfor %}
+
+
+
+
+
+<!-- Include html2pdf library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.8.0/html2pdf.bundle.min.js"></script>
+
+
+<!-- Your HTML template code here -->
+
+<script>
+// Function to trigger PDF download
+function downloadPDF() {
+    // Hide the download button during PDF generation
+    const downloadButton = document.getElementById('downloadButton');
+    downloadButton.style.display = 'none';
+
+    // Get the HTML content of the section with id "htmlContent"
+    const element = document.getElementById('htmlContent');
+
+    // Temporarily remove all video elements
+    const videoElements = element.querySelectorAll('video');
+    videoElements.forEach((video) => {
+        video.style.display = 'none';
+    });
+
+    // Use html2pdf library to create a PDF
+    html2pdf(element, {
+        filename: 'Final_Result.pdf',
+        image: { type: 'jpeg', quality: 2 },
+        html2canvas: { scale: 5 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait', pagesplit: true }
+    }).then(() => {
+        // Restore the video elements after PDF generation
+        videoElements.forEach((video) => {
+            video.style.display = 'block';
+        });
+
+        // Show the download button after PDF generation
+        downloadButton.style.display = 'block';
+    });
+}
+
+
+
+    </script>
+    
+
+
+
+
+
+
+
+<!-- if result is generated -->
+{% for i in sub_status %}
+{% if i.result_generate %}
+<section class="vh-100" id="htmlContent" style="background-color: rgb(255, 255, 255);margin-top: 50px;">
+
+    <div class="container h-100" style="margin-top: 5px;">
+        <div class="row">
+            <div class="col-md-5">
+                <h2 style=" color:rgb(0, 0, 0); margin-right: 10px;">Final Result </h2>
+            </div>
+            <div class="col-md-4">
+            </div>
+            <div class="col-md-3">
+                <button class="btn btn-lg" style="color: #ff5656;" id="downloadButton" onclick="downloadPDF()">Download PDF</button>
+            </div>
+        </div>
+        <hr color="black">
+    </div>
+
+
+    {% if type == 'Discriptive' %}
+    {% for i in sub_status %}
+    <div class="container h-100" style="margin-top: 5px;">
+        <div class="row">
+            <div class="col-md-5">
+                <h5 style=" color:#ff5656; margin-right: 10px;">User Name: {{ i.user_name }}</h5>
+                <h6 style=" color:#0096ff; margin-right: 10px;">Assessment Name: {{ i.assessment_name }}</h6>
+            </div>
+            <div class="col-md-4">
+            </div>
+            <div class="col-md-3">
+                <h5 style=" color:#ff5656;"><span style="font-weight: bold; color:#0096ff;">Over All accurecy of student
+                        is : </span> {{ i.final_result }}%</h5>
+            </div>
+        </div>
+        <hr color="black">
+    </div>
+
+    {% endfor %}
+
+
+    {% for i in sub_status %}
+    {% for video_ans_instance in i.video_answers.all %}
+    <div class="container h-100" style="margin-top: 5px;">
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Question {{ forloop.counter }} : </span></Question>
+                            {{ video_ans_instance.question_id.quostion }}</h5>
+
+                    </div>
+                </div>
+                <br>
+                <div class="card">
+
+                    <div class="card-body">
+
+                        <p> <span style="font-weight: bold;">Recorded Answer :</span>
+                            {{ video_ans_instance.trasnscript }}
+                        </p>
+                    </div>
+                </div>
+                <br>
+                <div class="card">
+                    <div class="card-body">
+
+                        <p> <span style="font-weight: bold;">Stored Answer : </span>
+                            {{ video_ans_instance.question_id.correctanswer }}
+                        </p>
+
+                        
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="card">
+                    <div class="card-body">
+
+                        <p style=" color:#ff5656;">Accuracy of Answer is: <span
+                                style="font-weight:bold; color:#000000;">{{ video_ans_instance.answer_accurecy }} %
+                            </span></p>
+                        <p style=" color:#ff5656;">Confidence : <span style="font-weight:bold; color:#000000;">
+                                {{ video_ans_instance.confidence }} %</span>
+                            Nervousness : <span style="font-weight:bold; color:#000000;">
+                                {{ video_ans_instance.nervousness }} %</span>
+                            Neutral_Emotions : <span style="font-weight:bold; color:#000000;">
+                                {{ video_ans_instance.neutral }} %</span>
+                        </p>
+                        <video width="100%" height="60%" controls>
+                            <source src="{{ url }}{{ video_ans_instance.videoAns }}" type="video/webm">
+                        </video>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <hr color="black">
+    </div>
+
+    {% endfor %}
+    {% endfor %}
+    {% elif type == 'Subjective' %}
+
+    {% for i in sub_status %}
+    <div class="container h-100" style="margin-top: 5px;">
+        <div class="row">
+            <div class="col-md-5">
+                <h5 style=" color:#ff5656; margin-right: 10px;">User Name: {{ i.user_name }}</h5>
+                <h6 style=" color:#0096ff; margin-right: 10px;">Assessment Name: {{ i.assessment_name }}</h6>
+            </div>
+            <div class="col-md-4">
+            </div>
+
+        </div>
+        <hr color="black">
+    </div>
+    {% endfor %}
+    {% for i in sub_status %}
+    {% for video_ans_instance in i.video_answers.all %}
+    <div class="container h-100" style="margin-top: 5px;">
+        <div class="row">
+            <div class="col-sm-6" id="res_only">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Question {{ forloop.counter }} : </span></Question>
+                            {{ video_ans_instance.question_id.quostion }}</h5>
+
+                    </div>
+                </div>
+                <br>
+
+                <div class="card">
+                    <div class="card-body">
+
+
+                        <p> <span style="font-weight: bold;">Recorded Answer :</span>
+                            {{ video_ans_instance.trasnscript }}
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-sm-6" id="resu_vid">
+                <div class="card">
+                    <div class="card-body" id="video_card">
+                        <p style=" color:#ff5656;">Confidence : <span style="font-weight:bold; color:#000000;">
+                            {{ video_ans_instance.confidence }} %</span>
+                        Nervousness : <span style="font-weight:bold; color:#000000;">
+                            {{ video_ans_instance.nervousness }} %</span>
+                        Neutral_Emotions : <span style="font-weight:bold; color:#000000;">
+                            {{ video_ans_instance.neutral }} %</span>
+                    </p>
+                        <video width="100%" height="60%" controls>
+                            <source src="{{ url }}{{ video_ans_instance.videoAns }}" type="video/webm">
+                        </video>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <hr color="black">
+    </div>
+
+
+    </div>
+    {% endfor %}
+    {% endfor %}
+
+
+    {% else %}
+    Pass
+    {% endif %}
+
+
+
+
+
+
+</section>
+{% endif %}
+{% endfor %}
+
+
+
+
+{% endblock %}

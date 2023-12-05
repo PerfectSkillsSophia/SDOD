@@ -3,42 +3,43 @@
 
 {% block content %}
 <section class="vh-100" style="background-color: rgb(255, 255, 255);margin-top: 50px;"></section>
-
+{% for ass in ass.all %}
+{% if ass.assessmentType == "Subjective" %}
 <div class="container">
-        <div class="row">
-          <div class="col-md-12">
+    <div class="row">
+        <div class="col-md-12">
             <h1>Add Questions.</h1>
             <div class="alert alert-secondary" role="alert">
                 Note : <span style="color: blue;">
-                  <ol>
-            
-                    <li>Directly start writing Question don't use "que:-" </li>
-                    <li>Provide correct answer with question to avoid conflict and for better result.</li>
-            
-                  </ol>
+                    <ol>
+
+                        <li>Directly start writing Question don't use "que:-" </li>
+
+
+                    </ol>
                 </span>
-              </div>
-          </div>
-
-
+            </div>
         </div>
+
+
+    </div>
+
     <form action="{% url 'Addquestion'  %}">
         <div class="form-group">
             <input class="form-control" name="que" type="que" placeholder="Write Question! "><br>
-            <input class="form-control" name="correctanswer" type="correctanswer" placeholder="Provide correct answer ">
         </div>
         <div class="form-group">
-            <select  type="hidden" class="form-control" name="ass" id="ass">
-                {% for ass in ass.all %}
+            <select type="hidden" class="form-control" name="ass" id="ass">
+
                 <option value="{{ ass.identi_assessment }}">{{ ass.identi_assessment }}</option>
-                {% endfor %}
+
             </select>
 
         </div>
         <div class="form-group"><button class="btn btn-primary btn-block my-2 my-sm-0" type="submit">ADD</button></div>
     </form>
-    <hr>
 </div>
+
 
 <div class="container">
     <div class="row">
@@ -48,7 +49,64 @@
         <div class="col-md-5">
             {% for que in ques.all reversed %}
             <h5>Question: {{ que.quostion }}<h5>
-                <h6>Answer: {{ que.correctanswer }}</h6>
+
+                    {% endfor %}
+        </div>
+        <div class="col-md-2">
+        </div>
+    </div>
+    <hr>
+</div>
+
+{% else %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h1>Add Questions.</h1>
+            <div class="alert alert-secondary" role="alert">
+                Note : <span style="color: blue;">
+                    <ol>
+
+                        <li>Directly start writing Question don't use "que:-" </li>
+
+
+                    </ol>
+                </span>
+            </div>
+        </div>
+    </div>
+
+        <form action="{% url 'Addquestion'  %}">
+            <div class="form-group">
+                <input class="form-control" name="que" type="que" placeholder="Write Question! "><br>
+                <input class="form-control" name="correctanswer" type="correctanswer"
+                    placeholder="Provide correct answer ">
+            </div>
+            <div class="form-group">
+                <select type="hidden" class="form-control" name="ass" id="ass">
+
+                    <option value="{{ ass.identi_assessment }}">{{ ass.identi_assessment }}</option>
+
+                </select>
+
+            </div>
+            <div class="form-group"><button class="btn btn-primary btn-block my-2 my-sm-0" type="submit">ADD</button>
+            </div>
+        </form>
+    </div>
+</div>
+<hr>
+
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-5">
+            <h1>Questions.</h1>
+        </div>
+        <div class="col-md-5">
+            {% for que in ques.all reversed %}
+            <h5>Question: {{ que.quostion }}<h5>
+                    <h6>Answer: {{ que.correctanswer }}</h6>
 
                     </ol>
                     {% endfor %}
@@ -58,6 +116,9 @@
     </div>
     <hr>
 </div>
+</div>
+{% endif %}
+{% endfor %}
 </section>
 
 

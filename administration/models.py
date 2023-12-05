@@ -4,6 +4,7 @@ class allAssessment(models.Model):
     assId = models.AutoField(primary_key=True)
     identi_assessment = models.CharField(max_length=300,null=True,default="None")
     assessmentName = models.CharField(max_length=255,null=True)
+    assessmentType = models.CharField(max_length=255,null=True,default="None")
     assessmentDes = models.CharField(max_length=1000,null=True)
     def __str__(self):
         return self.assessmentName
