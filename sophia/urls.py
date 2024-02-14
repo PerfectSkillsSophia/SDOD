@@ -20,6 +20,7 @@ from accounts.views import home
 from administration.views import testresult
 from assessments import urls as assurl
 from administration import urls as adminurl
+from response_evaluation import urls as response_evaluation_urls
 from django.conf.urls.static import static
 from django.conf import settings
 from django.views.static import serve
@@ -39,6 +40,7 @@ urlpatterns = [
     path('user/', include(accurl)),
     path('assessments/', include(assurl)),
     path('administration/', include(adminurl)),
+    path('response_evaluation/', include(response_evaluation_urls)),
 
     
     re_path(r'^media/(?P<path>.*)$', serve,{'document_root': settings.MEDIA_ROOT}), 

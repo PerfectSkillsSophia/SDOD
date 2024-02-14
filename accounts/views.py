@@ -28,7 +28,7 @@ def registerPage(request):
 				user = form.cleaned_data.get('username')
 				messages.success(request, 'Account Created successfully'+' ' + 'Hello'+ ' ' + user)
 
-				return redirect('login')
+				return redirect('home')
 			
 
 		context = {'form':form}
