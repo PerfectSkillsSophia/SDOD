@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    {% load static %}
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+        <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <title>Response_Evaluation</title>
+</head>
+
+<body>
+    {% if user.is_authenticated %}
+    <!-- Just an image -->
+
+    <nav class="navbar navbar-dark bg-dark" style="margin-top: 10px;">
+
+        <img src="{% static 'image/ps.png' %}" width="150" height="45" alt="">
+
+        <div class="form-inline" style="margin: 5px 5px 5px 5px 5px;">
+            <h2 style=" color:rgb(255, 255, 255); margin-right: 10px;">Hello,{{ user.first_name }}</h2>
+
+            <a class="btn btn-danger" style="text-align:center; margin-right: 10px;" href="{% url 'logout' %}"
+                role="button">Logout</a>
+        </div>
+    </nav>
+    {% else %}
+    <!-- Just an image -->
+    <nav class="navbar navbar-dark bg-dark" style="margin-top: 10px;">
+        <a class="navbar-brand" href="{% url 'home' %}">
+            <img src="{% static 'image/ps.png' %}" width="150" height="45" alt="">
+        </a>
+    </nav>
+    {% endif %}
+
+    {% if user.is_authenticated %}
+
+    <section class="vh-100" style="background-color: rgb(255, 255, 255); margin-top: 10px;">
+      <div class="container h-100">
+        <!-- Quostion and Assessment View -->
+        <div class="row">
+            <h5> Assessment Code:<span id="asscode"> {{ assessment_code }}</span></h5>
+          </div>
+        <div class="row" style="margin-left:5px;">
+          <div id="quiz" class="row">
+            {% for i in question %}
+            <div class="question" {% if forloop.first %}style="display: block" {% else %}style="display: none" {% endif %}>
+              <h5>Question {{ forloop.counter }}</h5>
+              <h5 id="que">{{ i.question }} <span style="display:none;">{{ i.questionId }}</span></h5>
+            </div>
+            {% endfor %}
+          </div>
+    
+    
+        </div>
+        <hr>
+        <div class="row d-flex justify-content-center align-items-center h-100">
+          <!-- Video View -->
+          <div class="col-md-6">
+            <h5 style="margin-left:5px; margin-right: 5px;">Instructions on how to use the platform.</h5>
+            <ol>
+              <li>Click <span class="text-success">Start</span> to start your video streaming</li>
+              <li>Click <span class="text-success">Record</span> to start video recording</li>
+              <li>Click <span class="text-success">Next</span> to go on next question</li>
+              <li>Click <span class="text-success">Stop</span> to stop video recording</li>
+              <li>Click <span class="text-success">Submit</span> to submit your video assessment</li>
+            </ol>
+            <div class="row d-flex justify-content-center align-items-center h-100">
+              <div class="col-md-4"><button class="btn btn-primary btn-lg btn-block"
+                  style=" margin-top: 5px; margin-bottom: 5px;" id="start">Start</button></div>
+              <div class="col-md-4"><button class="btn btn-primary btn-lg btn-block"
+                  style=" margin-top: 5px; margin-bottom: 5px;" id="record" disabled>Record</button></div>
+              <div class="col-md-4"><button class="btn btn-primary btn-lg btn-block"
+                  style=" margin-top: 5px; margin-bottom: 5px;" id="upload" disabled>Submit</button></div>
+              <div style="visibility: hidden;">
+                <label for="vehicle1" style="visibility: hidden;">Echo cancellation:</label>
+                <input type="checkbox" style="visibility: hidden;" id="echoCancellation"><br>
+              </div>
+              <hr>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <code>Video will appear here</code>
+            <video class="embed-responsive embed-responsive-16by9" id="gum" playsinline autoplay muted></video>
+          </div>
+          <ul id="blob-list"></ul>
+    
+        </div>
+        <hr>
+        <div class="row d-flex justify-content-center align-items-center h-100">
+    
+          <div class="col-md-12">
+            <div class="row">
+              <div class="col">
+                <button class="btn btn-primary btn-lg btn-block" id="nextBtn" disabled>Next Question</button>
+              </div>
+    
+            </div>
+          </div>
+    
+        </div>
+        <hr>
+        <div ></div>
+        <!-- Action View  -->
+    
+        <div class="row d-flex justify-content-center align-items-center h-100">
+          <a class="btn btn-danger btn-lg" id="exit" href="{% url 'feedback' %}" role="button"
+            style="visibility: hidden; margin-top: 5px; margin-bottom: 5px; margin-left: 5px; margin-right: 5px; width: 100%;">Exit
+            Assessment</a>
+        </div>
+      </div>
+    
+    
+    </section>
+    
+
+    
+    
+    {% endif %}
+
+    <script type="text/javascript">
+
+
+        // 'use strict' enforces better coding practices and catches common coding mistakes
+        'use strict';
+        
+        // Declare variables for media recording and question handling
+        let mediaRecorder;
+        let recordedBlobs;
+        let currentQuestion = 0;
+        const blobs = [];
+        const allque = [];
+        const questions = document.getElementsByClassName("question");
+        const nextBtn = document.getElementById("nextBtn");
+        const test_code = document.getElementById("asscode").innerHTML;
+        const errorMsgElement = document.querySelector('span#errorMsg');
+        const recordedVideo = document.querySelector('video#gum');
+        const recordButton = document.querySelector('button#record');
+        const uploadButton = document.querySelector('button#upload');
+        const startButton = document.querySelector('button#start');
+        const nextButton = document.querySelector('button#next');
+        
+        // Hide all questions except the first one
+        for (let i = 1; i < questions.length; i++) {
+          questions[i].style.display = "none";
+        }
+        
+        // Add event listener to navigate to the next question
+        nextBtn.addEventListener("click", function () {
+          currentQuestion++;
+          showQuestion(currentQuestion);
+          if (mediaRecorder && mediaRecorder.state === "recording") {
+            mediaRecorder.stop();
+            mediaRecorder.onstop = () => {
+              startRecording();
+            };
+          } else {
+            startRecording();
+          }
+        });
+        
+        // Loop through all the question elements and append them to allque
+        const questionElems = document.querySelectorAll(".question");
+        for (let i = 0; i < questionElems.length; i++) {
+          allque.push(questionElems[i].textContent);
+        }
+        
+        // Show the question at index n and manage button states
+        function showQuestion(n) {
+          // Disable the next button on the last question
+          if (n == questions.length - 2) {
+            nextBtn.innerHTML = "Last Question";
+          } else if (n == questions.length - 1) {
+            nextBtn.innerHTML = "Stop Assessment";
+          } else if (n == questions.length) {
+            if (mediaRecorder && mediaRecorder.state === "recording") {
+              mediaRecorder.stop();
+            }
+            nextBtn.innerHTML = "Click Stop Button to stop your Recording.";
+            nextBtn.disabled = true;
+            recordButton.disabled = false;
+          } else {
+            nextBtn.disabled = false;
+          }
+        
+          // Hide all questions except the one at index n
+          for (let i = 0; i < questions.length; i++) {
+            questions[i].style.display = i === n ? "block" : "none";
+          }
+        }
+        
+        // Initialize the media stream
+        async function init(constraints) {
+          try {
+            const stream = await navigator.mediaDevices.getUserMedia(constraints);
+            handleSuccess(stream);
+          } catch (e) {
+            console.error('navigator.getUserMedia error:', e);
+            errorMsgElement.innerHTML = `navigator.getUserMedia error:${e.toString()}`;
+          }
+        }
+        
+        // Handle success when getting user media stream
+        function handleSuccess(stream) {
+          recordButton.disabled = false;
+          console.log('getUserMedia() got stream:', stream);
+          window.stream = stream;
+        
+          const gumVideo = document.querySelector('video#gum');
+          gumVideo.srcObject = stream;
+        }
+        
+        startButton.addEventListener('click', async () => {
+          const hasEchoCancellation = document.querySelector('#echoCancellation').checked;
+          const constraints = {
+            audio: {
+              echoCancellation: { exact: hasEchoCancellation }
+            },
+            video: {
+              width: 2040, height: 1080
+            }
+          };
+          console.log('Using media constraints:', constraints);
+          await init(constraints);
+        });
+        
+        // Record button click event
+        recordButton.addEventListener('click', () => {
+          if (recordButton.textContent === 'Record') {
+            alert("Recording is started");
+            startRecording();
+            recordButton.disabled = true;
+            nextBtn.disabled = false;
+            startButton.disabled = true;
+          } else {
+            alert("Your answer is recorded. Review your answer and then submit it!");
+            recordButton.textContent = 'Record';
+            uploadButton.disabled = false;
+            startButton.disabled = true;
+            recordButton.disabled = true;
+          }
+        });
+        
+        // Start recording media
+        function startRecording() {
+          recordedBlobs = [];
+          const options = {
+            mimeType: 'video/webm;codecs=vp9,opus'
+          };
+          try {
+            mediaRecorder = new MediaRecorder(window.stream, options);
+          } catch (e) {
+            console.error('Exception while creating MediaRecorder:', e);
+            return;
+          }
+          recordButton.textContent = 'Stop';
+          uploadButton.disabled = true;
+          mediaRecorder.onstop = () => {};
+          mediaRecorder.ondataavailable = handleDataAvailable;
+          mediaRecorder.start();
+          console.log('MediaRecorder started', mediaRecorder);
+        }
+        
+        // Handle available data while recording
+        function handleDataAvailable(event) {
+          if (event.data && event.data.size > 0) {
+            recordedBlobs.push(event.data);
+            createBlob(recordedBlobs);
+          }
+        }
+        
+        // Create a blob from recorded blob data and store it in blobs array
+        function createBlob(recordedBlobs) {
+          const videoBlob = new Blob(recordedBlobs, { type: 'video/webm' });
+          blobs.push(videoBlob);
+          console.log(blobs);
+          recordedBlobs = [];
+        }
+        
+        // Function to get a cookie by name
+        function getCookie(name) {
+          let cookieValue = null;
+          if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+              const cookie = cookies[i].trim();
+              if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+              }
+            }
+          }
+          return cookieValue;
+        }
+        
+        // Upload button click event
+        uploadButton.addEventListener('click', () => {
+          const container = new FormData();
+          for (let i = 0; i < blobs.length; i++) {
+            container.append('video_' + i, blobs[i], 'video_' + i + '.webm');
+          }
+          container.append('questions', JSON.stringify(allque));
+          container.append('test_code', test_code);
+        
+          $.ajax({
+            type: 'POST',
+            url: 'fileUpload/',
+            headers: { "X-CSRFToken": getCookie("csrftoken") },
+            mode: "same-origin",
+            beforeSend: function () {
+              uploadButton.disabled = true;
+              startButton.disabled = true;
+              recordButton.disabled = true;
+            },
+            success: function () {
+              alert("Your assessment is submitted successfully! Exit The Assessment.");
+              document.getElementById("exit").style.visibility = "visible";
+            },
+            error: function () {
+              alert("Error occurred. Please try again.");
+              uploadButton.disabled = false;
+            },
+            data: container,
+            processData: false,
+            contentType: false
+          });
+        });
+        
+        // Stop recording function
+        function stopRecording() {
+          if (mediaRecorder && mediaRecorder.state === "recording") {
+            mediaRecorder.stop();
+          }
+          document.getElementById("exit").style.visibility = "visible";
+        }
+        
+        </script>
+    
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+
+          <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js"
+  integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"
+  integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+  crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"
+  integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+  crossorigin="anonymous"></script>
+</body>
+
+</html>

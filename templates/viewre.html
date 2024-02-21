@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    {% load static %}
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <title>Response_Evaluation</title>
+</head>
+
+<body>
+    {% if user.is_authenticated %}
+    <!-- Just an image -->
+
+    <nav class="navbar navbar-dark bg-dark" style="margin-top: 10px;">
+
+        <img src="{% static 'image/ps.png' %}" width="150" height="45" alt="">
+
+        <div class="form-inline" style="margin: 5px 5px 5px 5px 5px;">
+            <h2 style=" color:rgb(255, 255, 255); margin-right: 10px;">Hello,{{ user.first_name }}</h2>
+
+            <a class="btn btn-danger" style="text-align:center; margin-right: 10px;" href="{% url 'logout' %}"
+                role="button">Logout</a>
+        </div>
+    </nav>
+    {% else %}
+    <!-- Just an image -->
+    <nav class="navbar navbar-dark bg-dark" style="margin-top: 10px;">
+        <a class="navbar-brand" href="{% url 'home' %}">
+            <img src="{% static 'image/ps.png' %}" width="150" height="45" alt="">
+        </a>
+    </nav>
+    {% endif %}
+    <section class="vh-100" style="background-color: rgb(255, 255, 255);margin-top: 50px;">
+
+        <div class="container h-100" style="margin-top: 5px;">
+            <div class="row">
+                <div class="col-md-5">
+                    <h2 style=" color:rgb(0, 0, 0); margin-right: 10px;">Final Result </h2>
+                </div>
+                <div class="col-md-4">
+                </div>
+            </div>
+            <hr color="black">
+        </div>
+        {% if not result_generate %}
+        <div class="container h-100" style="margin-top: 5px;">
+            <div class="row">
+                <div class="col" id="resultgeneration">
+                    <h5 style=" color:#ff5656;">Result is not yet generated.</h5>
+                              <a href="{% url 'response_evaluation_result' test_code %}">  <button class="btn btn-primary btn-lg" id="run-task-button">Generate
+                                    result now !</button></a>
+
+                </div>
+                <div class="lds-hourglass"></div>
+    
+                
+            </div>
+            <hr color="black">
+        </div>
+        {% endif %}
+        {% for i in re %}
+        {% if i.result_generate %}
+
+        <div class="container h-100" style="margin-top: 5px;">
+            <div class="row">
+                <div class="col-sm-6" id="res_only">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Question {{ forloop.counter }} : </span></Question>
+                                {{ i.question_id }}</h5>
+    
+                        </div>
+                    </div>
+                    <br>
+    
+                    <div class="card">
+                        <div class="card-body">
+    
+    
+                            <p> <span style="font-weight: bold;">Recorded Answer :</span>
+                                {{ i.trasnscript }}
+                            </p>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="card">
+                        <div class="card-body">
+    
+    
+                            <p> <span style="font-weight: bold;">Recorded Answer :</span>
+                                {{ i.answer_accurecy }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6" id="resu_vid">
+                    <div class="card">
+                        <div class="card-body" id="video_card">
+                            <p style=" color:#ff5656;">Confidence : <span style="font-weight:bold; color:#000000;">
+                                {{ i.confidence }} %</span>
+                            Nervousness : <span style="font-weight:bold; color:#000000;">
+                                {{ i.nervousness }} %</span>
+                            Neutral_Emotions : <span style="font-weight:bold; color:#000000;">
+                                {{ i.neutral }} %</span>
+                        </p>
+                            <video width="100%" height="60%" controls>
+                                <source src="{{ url }}{{ i.videoAns }}" type="video/webm">
+                            </video>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <hr color="black">
+        </div>
+    
+    
+        </div>
+
+        {% endif %}
+        {% endfor %}
+
+
+        <!-- Include html2pdf library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.8.0/html2pdf.bundle.min.js"></script>
+
+
+<!-- Your HTML template code here -->
+
+<script>
+// Function to trigger PDF download
+function downloadPDF() {
+    // Hide the download button during PDF generation
+    const downloadButton = document.getElementById('downloadButton');
+    downloadButton.style.display = 'none';
+
+    // Get the HTML content of the section with id "htmlContent"
+    const element = document.getElementById('htmlContent');
+
+    // Temporarily remove all video elements
+    const videoElements = element.querySelectorAll('video');
+    videoElements.forEach((video) => {
+        video.style.display = 'none';
+    });
+
+    // Use html2pdf library to create a PDF
+    html2pdf(element, {
+        filename: 'Final_Result.pdf',
+        image: { type: 'jpeg', quality: 2 },
+        html2canvas: { scale: 5 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait', pagesplit: true }
+    }).then(() => {
+        // Restore the video elements after PDF generation
+        videoElements.forEach((video) => {
+            video.style.display = 'block';
+        });
+
+        // Show the download button after PDF generation
+        downloadButton.style.display = 'block';
+    });
+}
+
+
+
+    </script>
+    
+
+    
+
+    </section>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>

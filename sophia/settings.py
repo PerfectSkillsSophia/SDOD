@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-f!0bd-ff_yr9@*ks^fr!4#@nwikd0!@8*o4*)_$!mn0ej(&hgy'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 ALLOWED_HOSTS = ['127.0.0.1','*','https://psautoscreen.com/','143.110.186.218']
 
 
