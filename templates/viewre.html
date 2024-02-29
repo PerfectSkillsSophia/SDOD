@@ -66,15 +66,14 @@
         </div>
         {% endif %}
         {% for i in re %}
-        {% if i.result_generate %}
 
         <div class="container h-100" style="margin-top: 5px;">
             <div class="row">
                 <div class="col-sm-6" id="res_only">
                     <div class="card">
                         <div class="card-body">
-                            <h5 class="card-title">Question {{ forloop.counter }} : </span></Question>
-                                {{ i.question_id }}</h5>
+                            <h5 class="card-title">
+                                {{ i.que }}</h5>
     
                         </div>
                     </div>
@@ -91,17 +90,6 @@
                     </div>
                     <br>
                     <div class="card">
-                        <div class="card-body">
-    
-    
-                            <p> <span style="font-weight: bold;">Recorded Answer :</span>
-                                {{ i.answer_accurecy }}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-sm-6" id="resu_vid">
-                    <div class="card">
                         <div class="card-body" id="video_card">
                             <p style=" color:#ff5656;">Confidence : <span style="font-weight:bold; color:#000000;">
                                 {{ i.confidence }} %</span>
@@ -110,6 +98,13 @@
                             Neutral_Emotions : <span style="font-weight:bold; color:#000000;">
                                 {{ i.neutral }} %</span>
                         </p>
+                        </div>
+                    </div>
+                    <br>
+                </div>
+                <div class="col-sm-6" id="resu_vid">
+                    <div class="card">
+                        <div class="card-body" id="video_card">
                             <video width="100%" height="60%" controls>
                                 <source src="{{ url }}{{ i.videoAns }}" type="video/webm">
                             </video>
@@ -123,7 +118,7 @@
     
         </div>
 
-        {% endif %}
+
         {% endfor %}
 
 

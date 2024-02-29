@@ -10,7 +10,7 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
         integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <title>Response_Evaluation</title>
 </head>
 
@@ -39,116 +39,113 @@
     {% endif %}
 
     <section class="vh-100" style="background-color: rgb(255, 255, 255);margin-top: 50px;">
-    <div class="container">
-        <div class="row">
-            <div class="col-md-12">
-                <h1>Response_Evaluation</h1>
-                <div class="alert alert-secondary" role="alert">
-                    Note : <span style="color: blue;">
-                        <ol>
-
-                            <li>Directly start writing Question don't use "que:-" </li>
-
-
-                        </ol>
-                    </span>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <h1>Response_Evaluation</h1>
                 </div>
             </div>
+
         </div>
-
-        <form action="{% url 'Response_Evaluation_Assessment'  %}">
-            <div class="form-group">
-                <div class="row">
-                    <div class="col"><input class="form-control" name="que1" type="que"
-                            placeholder="Please write first question. ">
-                    </div>
-                    <div class="col"> <input class="form-control" name="correctanswer1" type="correctanswer"
-                            placeholder="Provide sutaibale answer "></div>
-                </div>
-            </div><br>
-            <div class="form-group">
-                <div class="row">
-                    <div class="col"><input class="form-control" name="que2" type="que"
-                            placeholder="Please write first question. ">
-                    </div>
-                    <div class="col"> <input class="form-control" name="correctanswer2" type="correctanswer"
-                            placeholder="Provide sutaibale answer "></div>
-                </div>
-            </div><br>
-            <div class="form-group">
-                <div class="row">
-                    <div class="col"><input class="form-control" name="que3" type="que"
-                            placeholder="Please write first question. ">
-                    </div>
-                    <div class="col"> <input class="form-control" name="correctanswer3" type="correctanswer"
-                            placeholder="Provide sutaibale answer "></div>
-                </div>
-            </div><br>
-            <div class="form-group">
-                <div class="row">
-                    <div class="col"><input class="form-control" name="que4" type="que"
-                            placeholder="Please write first question. ">
-                    </div>
-                    <div class="col"> <input class="form-control" name="correctanswer4" type="correctanswer"
-                            placeholder="Provide sutaibale answer "></div>
-                </div>
-            </div><br>
-            <div class="form-group">
-                <div class="row">
-                    <div class="col"><input class="form-control" name="que5" type="que"
-                            placeholder="Please write first question. ">
-                    </div>
-                    <div class="col"> <input class="form-control" name="correctanswer5" type="correctanswer"
-                            placeholder="Provide sutaibale answer "></div>
-                </div>
-            </div><br>
-            <div class="form-group"><button class="btn btn-primary btn-block my-2 my-sm-0" type="submit">ADD</button>
-            </div>
-        </form>
-    </div>
-
-<hr>
-    <div class="container">
-        Your Created Test
-        <div class="row">
-
-    
-    {% for assessment in user_assessments %}
-    <div class="col-md-4" style="margin-top:5px ; padding-top: 5px;">
-        <div class="card">
-            <div class="card-body">
-                <div class="alert alert-primary" role="alert">
-                    Response_Evaluation_Assessment Code:<br> {{ assessment.assessment_code }}<br>
-
-                    <hr>
-                </div>
-                <!--  <a href="#" class="btn btn-primary">Send Link</a> -->
-            </div>
-        </div>
-    </div>
-
-{% endfor %}
-        </div></div>
         <hr>
-    <div class="container" style="margin-top: 5px;">
-        Submission for your test.
-        <div class="row">
-            
-            {% for item in data %}
-            <div class="col-md-4" style="margin-top:10px ;">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Submitted_By : {{ item.Submitted_user_name }}</h5>
-                        <h5 class="card-title">Assessment Name : {{ item.test_code }}</h5>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <h6>Select category and add questions from below list. (you can select upto 10 questions) </h>
+                </div>
+            </div>
+            <form method="post" action="{% url 'Response_Evaluation_Assessment' %}" id="questionForm">
+                {% csrf_token %}
+                <div class="row">
+                    {% for category in cats %}
+                    <div class="col-md-4 ">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <a data-toggle="collapse" href="#{{ category.id }}" role="button" aria-expanded="True"
+                                    aria-controls="{{ category.id }}">
+                                    {{ category.category_name }}
+                                </a>
+
+                            </div>
+
+                        </div><br>
+
+                        <div class="collapse" id="{{ category.id }}"><br>
+                            <div class="card card-body">
+                                {% for question in category.question_set.all %}
+                                <div class="question-container">
+                                    <input type="checkbox" name="selected_questions" value="{{ question.id }}">
+                                    {{ question.question }}
+                                </div><br>
+                                {% endfor %}
+                            </div><br>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div><br>
+                <button type="submit" class="btn btn-primary">Submit Selection</button>
+            </form>
+            <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    const maxSelection = 10;
+
+                    $('input[name="selected_questions"]').on('change', function () {
+                        const selectedCheckboxes = $('input[name="selected_questions"]:checked');
+
+                        if (selectedCheckboxes.length > maxSelection) {
+                            $(this).prop('checked', false);
+                        }
+                    });
+                });
+            </script>
+
+
+        </div>
+
+
+        <hr>
+        <div class="container">
+            Your Created Test
+            <div class="row">
+
+
+                {% for assessment in user_assessments %}
+                <div class="col-md-4" style="margin-top:5px ; padding-top: 5px;">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="alert alert-primary" role="alert">
+                                Response_Evaluation_Assessment Code:<br> {{ assessment.assessment_code }}<br>
+
+                                <hr>
+                            </div>
+                            <!--  <a href="#" class="btn btn-primary">Send Link</a> -->
+                        </div>
+                    </div>
+                </div>
+
+                {% endfor %}
+            </div>
+        </div>
+        <hr>
+        <div class="container" style="margin-top: 5px;">
+            Submission for your test.
+            <div class="row">
+
+                {% for item in data %}
+                <div class="col-md-4" style="margin-top:10px ;">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Submitted_By : {{ item.Submitted_user_name }}</h5>
+                            <h5 class="card-title">Assessment Name : {{ item.test_code }}</h5>
                             <a href="{% url 're_result_view'  item.Submission_code  %}" class="btn btn-primary
                             btn-block">View Analysis</a>
+                        </div>
                     </div>
                 </div>
+                {% endfor %}
             </div>
-            {% endfor %}
         </div>
-    </div>
-<hr>
+        <hr>
 
     </section>
 

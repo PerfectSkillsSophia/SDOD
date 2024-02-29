@@ -247,11 +247,10 @@ def re_result_view(request, test_code):
 
 
 def response_evaluation_dashboard(request):
-	user_assessments = response_evaluation_Assessment.objects.filter(user=request.user)
-	submissions = UserSubmittedTest.objects.filter(created_by=request.user)	
-	print(submissions)
-
-	return render(request, 'response_evaluation_dashboard.html',{'user_assessments' : user_assessments,'data':submissions})
+    category = Category.objects.all()
+    user_assessments = response_evaluation_Assessment.objects.filter(user=request.user)
+    submissions = UserSubmittedTest.objects.filter(created_by=request.user)
+    return render(request, 'response_evaluation_dashboard.html',{'user_assessments' : user_assessments,'data':submissions,'cats':category})
 
 def response_evaluation_test_dashboard(request):
 	return render(request, 're_test_1stpage.html')
@@ -272,12 +271,9 @@ def response_evaluation_result(request, test_code):
         result.confidence = confidence
         result.nervousness = nervousness
         result.neutral = neutral
-        result.transcript = transcript
+        print(transcript)
+        result.trasnscript = transcript
         # Additional code for accuracy calculation
-        s1 = UserSubmittedQuestion.objects.get(question=result.question_id).answer
-        s2 = transcript
-        acc = FindAcc(s1, s2)
-        result.answer_accurecy = acc
 
         result.save()
         
@@ -297,31 +293,43 @@ def response_evaluation_test (request):
 		if request.method == 'POST':
 			assessment_code = request.POST.get('identi_assessment')
 			assess=response_evaluation_Assessment.objects.get(assessment_code=assessment_code)
-			assessment_code = assess.assessment_code
-			allque = assess.usersubmittedquestion_set.all()			
+
+			allque = assess.questions.all()			
 			print(allque)
 			return render(request, 're_test.html',{'question': allque, 'assessment_code':assessment_code})		
 		else:
 				return render(request,'assessments_dashboard.html')
 
+
 def Response_Evaluation_Assessment(request):
-	if request.method == 'GET':
-		question_params = ['que1', 'que2', 'que3', 'que4', 'que5']
-		answer_params = ['correctanswer1', 'correctanswer2', 'correctanswer3', 'correctanswer4', 'correctanswer5']
-		random_number = random.choice(string.digits)
-		random_character = random.choice(string.ascii_letters)
-		identi_assessment = "ResponseEvaluation" + "_" + random_number + random_character
-		new_assessment = response_evaluation_Assessment.objects.create(user=request.user, title='Response_Evaluation',assessment_code = identi_assessment )
-		for i in range(5):
-			question_text = request.GET.get(question_params[i])
-			answer_text = request.GET.get(answer_params[i])
-			UserSubmittedQuestion.objects.create(
-            question=question_text,
-            answer=answer_text,
-            assessment=new_assessment
+    ref_url = request.META.get('HTTP_REFERER')
+    if request.method == 'POST':
+        user_name = request.user
+        random_number = random.choice(string.digits)
+        random_character = random.choice(string.ascii_letters)
+        identi_assessment = "ResponseEvaluation" + "_" + random_number + random_character
+        assessment_code = identi_assessment
+        assessment = response_evaluation_Assessment.objects.create(
+            user=user_name,
+            title="RE",
+            assessment_code= assessment_code
         )
-		return redirect('response_evaluation_dashboard')
-	return redirect('response_evaluation_dashboard')
+
+        # Add selected questions to the assessment
+        selected_question_ids = request.POST.getlist('selected_questions')
+                # Convert selected question IDs to integers
+        selected_question_ids = [int(id) for id in request.POST.getlist('selected_questions')]
+
+        # Add selected questions to the assessment
+        assessment.questions.set(selected_question_ids)
+        print(selected_question_ids)
+
+
+        return HttpResponseRedirect(ref_url)
+
+    # Render the initial form
+    return render(request, 'response_evaluation_dashboard.html')
+
 
 
 
@@ -338,7 +346,7 @@ def fileUpload(request):
 
 		questions = json.loads(request.POST.get('questions'))
 		for question in questions:
-			qid = question.split()[-1]
+			qid = question
 			qid_list.append(qid)
 			print(qid)
 		for i in range(len(request.FILES)):
@@ -347,7 +355,7 @@ def fileUpload(request):
         # Create a video answer object for each uploaded video
 		for i, video in zip(qid_list,videos):
 
-			re_recordings.objects.create(videoAns=video,test=newre,Submission_code=code,question_id=i)
+			re_recordings.objects.create(videoAns=video,test=newre,Submission_code=code,que=i)
 			response_data = {'status': 'success'}
 		return JsonResponse(response_data)
 	else:
